@@ -1,16 +1,11 @@
-library flutter_bluetooth_serial;
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
 
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:convert';
+class FlutterBluetoothSerial {
+  Future<String?> getPlatformVersion() {
+    return FlutterBluetoothSerialPlatform.instance.getPlatformVersion();
+  }
 
-import 'package:flutter/services.dart';
-
-part './BluetoothState.dart';
-part './BluetoothBondState.dart';
-part './BluetoothDeviceType.dart';
-part './BluetoothDevice.dart';
-part './BluetoothPairingRequest.dart';
-part './BluetoothDiscoveryResult.dart';
-part './BluetoothConnection.dart';
-part './FlutterBluetoothSerial.dart';
+  Future<bool> isAvailable() {
+    return FlutterBluetoothSerialPlatform.instance.isAvailable();
+  }
+}
