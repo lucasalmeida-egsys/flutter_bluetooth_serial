@@ -29,7 +29,7 @@ class FlutterBluetoothSerialPlugin :
     private val tag = "FlutterBluetoothPlugin"
     private val namespace = "flutter_bluetooth_serial"
     private lateinit var channel: MethodChannel
-    private val pendingResultForActivityResult: Result? = null
+    private var pendingResultForActivityResult: Result? = null
 
     // General Bluetooth
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -78,8 +78,16 @@ class FlutterBluetoothSerialPlugin :
                 result.success(null)
             }
 
-            "getPlatformVersion" -> {
-                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            "requestEnable" -> {
+                if (bluetoothAdapter?.isEnabled == true) {
+                    result.success(true)
+                } else {
+                    pendingResultForActivityResult = result
+                    activity.startActivityForResult(
+                        Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
+                        REQUEST_ENABLE_BLUETOOTH,
+                    )
+                }
             }
 
             else -> {
@@ -101,15 +109,13 @@ class FlutterBluetoothSerialPlugin :
 
         bluetoothAdapter = manager?.adapter
 
-        // TODO: addActivityResultListener
+        binding.addActivityResultListener { requestCode, resultCode, _ ->
+            when (requestCode) {
+                REQUEST_ENABLE_BLUETOOTH -> {
+                    pendingResultForActivityResult?.success(resultCode != 0)
+                    true
+                }
 
-//        binding.addActivityResultListener { requestCode, resultCode, intent ->
-//            when (requestCode) {
-//                REQUEST_ENABLE_BLUETOOTH -> {
-//                    pendingResultForActivityResult?.success(resultCode != 0)
-//                    true
-//                }
-//
 //                REQUEST_DISCOVERABLE_BLUETOOTH -> {
 //                    pendingResultForActivityResult?.success(
 //                        // TODO: This if is really necessary?
@@ -121,10 +127,10 @@ class FlutterBluetoothSerialPlugin :
 //                    )
 //                    true
 //                }
-//
-//                else -> false
-//            }
-//        }
+
+                else -> false
+            }
+        }
 
         // TODO: addRequestPermissionsResultListener
     }

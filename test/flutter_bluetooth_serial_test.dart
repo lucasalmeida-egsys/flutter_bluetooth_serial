@@ -8,10 +8,13 @@ class MockFlutterBluetoothSerialPlatform
     with MockPlatformInterfaceMixin
     implements FlutterBluetoothSerialPlatform {
   @override
-  Future<String?> getPlatformVersion() => Future<String?>.value('42');
+  Future<bool> isAvailable() => Future<bool>.value(true);
 
   @override
-  Future<bool> isAvailable() => Future<bool>.value(true);
+  Future<bool> isEnabled() => Future<bool>.value(true);
+
+  @override
+  Future<void> openSettings() => Future<void>.value();
 }
 
 void main() {
@@ -20,10 +23,12 @@ void main() {
 
   test('$MethodChannelFlutterBluetoothSerial is the default instance', () {
     expect(
-        initialPlatform, isInstanceOf<MethodChannelFlutterBluetoothSerial>());
+      initialPlatform,
+      isInstanceOf<MethodChannelFlutterBluetoothSerial>(),
+    );
   });
 
-  test('getPlatformVersion', () async {
+  test('isAvailable', () async {
     final FlutterBluetoothSerial flutterBluetoothSerialPlugin =
         FlutterBluetoothSerial();
 
@@ -32,6 +37,11 @@ void main() {
 
     FlutterBluetoothSerialPlatform.instance = fakePlatform;
 
-    expect(await flutterBluetoothSerialPlugin.getPlatformVersion(), '42');
+    expect(await flutterBluetoothSerialPlugin.isAvailable(), true);
   });
+
+  // TODO(anyone): isEnabled
+
+  // TODO(anyone): openSettings
+
 }
