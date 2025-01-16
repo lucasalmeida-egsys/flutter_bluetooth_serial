@@ -22,4 +22,9 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Future<void> openSettings() async =>
       methodChannel.invokeMethod<void>('openSettings');
+
+  @override
+  Future<bool> requestEnable() async {
+    return (await methodChannel.invokeMethod<bool>('requestEnable')) ?? false;
+  }
 }

@@ -1,10 +1,14 @@
 package io.github.edufolly.flutter_bluetooth_serial
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -16,7 +20,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 // Permissions and request constants
-const val REQUEST_COARSE_LOCATION_PERMISSIONS: Int = 1451
+const val REQUEST_BLUETOOTH_PERMISSIONS: Int = 1451
 const val REQUEST_ENABLE_BLUETOOTH: Int = 1337
 const val REQUEST_DISCOVERABLE_BLUETOOTH: Int = 2137
 
@@ -25,11 +29,16 @@ class FlutterBluetoothSerialPlugin :
     FlutterPlugin,
     MethodCallHandler,
     ActivityAware {
+//    private interface EnsurePermissionsCallback {
+//        fun onResult(granted: Boolean)
+//    }
+
     // Plugin
     private val tag = "FlutterBluetoothPlugin"
     private val namespace = "flutter_bluetooth_serial"
     private lateinit var channel: MethodChannel
     private var pendingResultForActivityResult: Result? = null
+    private var pendingPermissionsEnsureCallback: ((Boolean) -> Unit)? = null
 
     // General Bluetooth
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -37,7 +46,61 @@ class FlutterBluetoothSerialPlugin :
     private lateinit var activity: Activity
     private lateinit var context: Context
 
-    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    private fun getBluetoothPermissionName(): String =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            "nearby devices"
+        } else {
+            "location"
+        }
+
+    private fun checkPermissions(permissions: Array<String>): Boolean =
+        checkGranted(
+            permissions
+                .map { activity.checkSelfPermission(it) }
+                .toIntArray(),
+        )
+
+    private fun checkGranted(permissions: IntArray): Boolean =
+        permissions.fold(true) { acc, permission ->
+            acc && permission == PackageManager.PERMISSION_GRANTED
+        }
+
+    private fun ensurePermissions(
+        callback: (Boolean) -> Unit,
+        needPermissionOnOldVersions: Boolean = false,
+    ) {
+        val permissions: Array<String> =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_ADVERTISE,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                )
+            } else {
+                if (needPermissionOnOldVersions) {
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+                } else {
+                    emptyArray<String>()
+                }
+            }
+
+        if (!checkPermissions(permissions)) {
+            pendingPermissionsEnsureCallback = callback
+
+            activity.requestPermissions(
+                permissions,
+                REQUEST_BLUETOOTH_PERMISSIONS,
+            )
+
+            return
+        }
+
+        callback(true)
+    }
+
+    override fun onAttachedToEngine(
+        flutterPluginBinding: FlutterPlugin.FlutterPluginBinding,
+    ) {
         Log.v("FlutterBluetoothSerial", "Attached to engine")
         channel =
             MethodChannel(
@@ -47,6 +110,7 @@ class FlutterBluetoothSerialPlugin :
         channel.setMethodCallHandler(this)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
@@ -74,7 +138,9 @@ class FlutterBluetoothSerialPlugin :
             }
 
             "openSettings" -> {
-                activity.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                activity.startActivity(
+                    Intent(Settings.ACTION_BLUETOOTH_SETTINGS),
+                )
                 result.success(null)
             }
 
@@ -82,11 +148,18 @@ class FlutterBluetoothSerialPlugin :
                 if (bluetoothAdapter?.isEnabled == true) {
                     result.success(true)
                 } else {
-                    pendingResultForActivityResult = result
-                    activity.startActivityForResult(
-                        Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
-                        REQUEST_ENABLE_BLUETOOTH,
-                    )
+                    ensurePermissions({ granted ->
+                        if (granted) {
+                            pendingResultForActivityResult = result
+
+                            activity.startActivityForResult(
+                                Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
+                                REQUEST_ENABLE_BLUETOOTH,
+                            )
+                        } else {
+                            result.success(false)
+                        }
+                    })
                 }
             }
 
@@ -96,7 +169,9 @@ class FlutterBluetoothSerialPlugin :
         }
     }
 
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(
+        binding: FlutterPlugin.FlutterPluginBinding,
+    ) {
         channel.setMethodCallHandler(null)
     }
 
@@ -105,7 +180,9 @@ class FlutterBluetoothSerialPlugin :
         this.context = binding.activity.applicationContext
 
         val manager =
-            activity.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
+            activity.getSystemService(
+                Context.BLUETOOTH_SERVICE,
+            ) as BluetoothManager?
 
         bluetoothAdapter = manager?.adapter
 
@@ -128,17 +205,38 @@ class FlutterBluetoothSerialPlugin :
 //                    true
 //                }
 
-                else -> false
+                else -> {
+                    false
+                }
             }
         }
 
-        // TODO: addRequestPermissionsResultListener
+        binding.addRequestPermissionsResultListener {
+            requestCode,
+            _,
+            grantResults,
+            ->
+            when (requestCode) {
+                REQUEST_BLUETOOTH_PERMISSIONS -> {
+                    pendingPermissionsEnsureCallback?.let {
+                        it(checkGranted(grantResults))
+                    }
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
     }
 
-    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    override fun onReattachedToActivityForConfigChanges(
+        binding: ActivityPluginBinding,
+    ) {
     }
 
     override fun onDetachedFromActivity() {

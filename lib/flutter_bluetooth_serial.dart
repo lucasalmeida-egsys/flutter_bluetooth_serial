@@ -9,4 +9,7 @@ class FlutterBluetoothSerial {
 
   Future<void> openSettings() =>
       FlutterBluetoothSerialPlatform.instance.openSettings();
+
+  Future<bool> requestEnable() =>
+      FlutterBluetoothSerialPlatform.instance.requestEnable();
 }

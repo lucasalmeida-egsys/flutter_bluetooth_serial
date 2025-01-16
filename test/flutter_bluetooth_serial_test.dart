@@ -15,6 +15,9 @@ class MockFlutterBluetoothSerialPlatform
 
   @override
   Future<void> openSettings() => Future<void>.value();
+
+  @override
+  Future<bool> requestEnable() => Future<bool>.value(true);
 }
 
 void main() {
@@ -44,4 +47,5 @@ void main() {
 
   // TODO(anyone): openSettings
 
+  // TODO(anyone): requestEnable
 }

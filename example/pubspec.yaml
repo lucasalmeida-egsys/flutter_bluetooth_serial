@@ -1,6 +1,6 @@
 name: flutter_bluetooth_serial_example
 description: "Demonstrates how to use the flutter_bluetooth_serial plugin."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
 environment:
   sdk: ^3.6.1
@@ -12,15 +12,20 @@ dependencies:
   flutter_bluetooth_serial:
     path: ../
 
-dev_dependencies:
-  integration_test:
+  flutter_localizations:
     sdk: flutter
+
+  # https://pub.dev/packages/folly_fields
+  folly_fields: 3.5.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
+  integration_test:
+    sdk: flutter
 
 flutter:
-
   uses-material-design: true
-
