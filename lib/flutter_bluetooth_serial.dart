@@ -12,4 +12,7 @@ class FlutterBluetoothSerial {
 
   Future<bool> requestEnable() =>
       FlutterBluetoothSerialPlatform.instance.requestEnable();
+
+  Future<bool> requestDisable() =>
+      FlutterBluetoothSerialPlatform.instance.requestDisable();
 }

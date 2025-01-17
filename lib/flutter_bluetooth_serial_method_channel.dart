@@ -27,4 +27,9 @@ class MethodChannelFlutterBluetoothSerial
   Future<bool> requestEnable() async {
     return (await methodChannel.invokeMethod<bool>('requestEnable')) ?? false;
   }
+
+  @override
+  Future<bool> requestDisable() async {
+    return (await methodChannel.invokeMethod<bool>('requestDisable')) ?? false;
+  }
 }

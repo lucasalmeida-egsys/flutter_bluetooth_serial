@@ -57,12 +57,19 @@ class _HomeState extends State<Home> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              // Available
               Text('Bluetooth available: $_isAvailable'),
+
+              // Enabled
               Text('Bluetooth enabled: $_isEnabled'),
+
+              // Open Settings
               ElevatedButton(
                 onPressed: _flutterBluetoothSerialPlugin.openSettings,
                 child: const Text('Open Settings'),
               ),
+
+              // Request Enable
               ElevatedButton(
                 onPressed: () async {
                   final bool enabled =
@@ -70,13 +77,30 @@ class _HomeState extends State<Home> {
 
                   await FollyDialogs.dialogMessage(
                     context: context,
-                    title: 'Returned value',
-                    message: 'Request Enable: $enabled',
+                    title: 'Request Enable',
+                    message: '$enabled',
                   );
 
                   await initPlatformState();
                 },
                 child: const Text('Request Enable'),
+              ),
+
+              // Request Disable
+              ElevatedButton(
+                onPressed: () async {
+                  final bool disabled =
+                      await _flutterBluetoothSerialPlugin.requestDisable();
+
+                  await FollyDialogs.dialogMessage(
+                    context: context,
+                    title: 'Request Disable',
+                    message: '$disabled',
+                  );
+
+                  await initPlatformState();
+                },
+                child: const Text('Request Disable'),
               ),
             ],
           ),

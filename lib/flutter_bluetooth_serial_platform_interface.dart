@@ -31,4 +31,8 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
   Future<bool> requestEnable() {
     throw UnimplementedError('requestEnable() has not been implemented.');
   }
+
+  Future<bool> requestDisable() {
+    throw UnimplementedError('requestDisable() has not been implemented.');
+  }
 }

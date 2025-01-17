@@ -21,8 +21,10 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 // Permissions and request constants
 const val REQUEST_BLUETOOTH_PERMISSIONS: Int = 1451
-const val REQUEST_ENABLE_BLUETOOTH: Int = 1337
+const val REQUEST_BLUETOOTH: Int = 1337
 const val REQUEST_DISCOVERABLE_BLUETOOTH: Int = 2137
+const val BLUETOOTH_REQUEST_DISABLE: String =
+    "android.bluetooth.adapter.action.REQUEST_DISABLE"
 
 /** FlutterBluetoothSerialPlugin */
 class FlutterBluetoothSerialPlugin :
@@ -154,12 +156,31 @@ class FlutterBluetoothSerialPlugin :
 
                             activity.startActivityForResult(
                                 Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
-                                REQUEST_ENABLE_BLUETOOTH,
+                                REQUEST_BLUETOOTH,
                             )
                         } else {
                             result.success(false)
                         }
                     })
+                }
+            }
+
+            "requestDisable" -> {
+                if (bluetoothAdapter?.isEnabled == true) {
+                    ensurePermissions({ granted ->
+                        if (granted) {
+                            pendingResultForActivityResult = result
+
+                            activity.startActivityForResult(
+                                Intent(BLUETOOTH_REQUEST_DISABLE),
+                                REQUEST_BLUETOOTH,
+                            )
+                        } else {
+                            result.success(false)
+                        }
+                    })
+                } else {
+                    result.success(true)
                 }
             }
 
@@ -188,7 +209,7 @@ class FlutterBluetoothSerialPlugin :
 
         binding.addActivityResultListener { requestCode, resultCode, _ ->
             when (requestCode) {
-                REQUEST_ENABLE_BLUETOOTH -> {
+                REQUEST_BLUETOOTH -> {
                     pendingResultForActivityResult?.success(resultCode != 0)
                     true
                 }
