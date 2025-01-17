@@ -27,6 +27,9 @@ class MockFlutterBluetoothSerialPlatform
   Future<bool> ensurePermissions() => Future<bool>.value(true);
 
   @override
+  Future<String> getAddress() => Future<String>.value('00:00:00:00:00:00');
+
+  @override
   Future<BluetoothState> getState() =>
       Future<BluetoothState>.value(BluetoothState.on);
 
@@ -69,6 +72,8 @@ void main() {
   // TODO(anyone): requestDisable
 
   // TODO(anyone): ensurePermissions
+
+  // TODO(anyone): getAddress
 
   // TODO(anyone): getState
 

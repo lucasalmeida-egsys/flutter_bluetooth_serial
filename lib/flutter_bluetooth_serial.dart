@@ -20,6 +20,9 @@ class FlutterBluetoothSerial {
   Future<bool> ensurePermissions() =>
       FlutterBluetoothSerialPlatform.instance.ensurePermissions();
 
+  Future<String?> getAddress() =>
+      FlutterBluetoothSerialPlatform.instance.getAddress();
+
   Future<BluetoothState> getState() =>
       FlutterBluetoothSerialPlatform.instance.getState();
 

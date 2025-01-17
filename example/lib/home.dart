@@ -16,7 +16,8 @@ class _HomeState extends State<Home> {
   bool _isAvailable = false;
   bool _isEnabled = false;
   BluetoothState _state = BluetoothState.unknown;
-  String? _name = null;
+  String? _name;
+  String? _address;
 
   final FlutterBluetoothSerial _flutterBluetoothSerialPlugin =
       FlutterBluetoothSerial();
@@ -32,6 +33,8 @@ class _HomeState extends State<Home> {
 
     final bool isEnabled = await _flutterBluetoothSerialPlugin.isEnabled();
 
+    final String? address = await _flutterBluetoothSerialPlugin.getAddress();
+
     final BluetoothState state = await _flutterBluetoothSerialPlugin.getState();
 
     final String? name = await _flutterBluetoothSerialPlugin.getName();
@@ -43,6 +46,7 @@ class _HomeState extends State<Home> {
     setState(() {
       _isAvailable = isAvailable;
       _isEnabled = isEnabled;
+      _address = address;
       _state = state;
       _name = name;
     });
@@ -71,6 +75,9 @@ class _HomeState extends State<Home> {
 
               // Enabled
               Text('Enabled: $_isEnabled'),
+
+              // Address
+              Text('Address: $_address'),
 
               // State
               Text('State: $_state'),

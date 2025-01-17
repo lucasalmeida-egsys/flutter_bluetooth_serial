@@ -18,6 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.net.NetworkInterface
 
 // Permissions and request constants
 const val REQUEST_BLUETOOTH_PERMISSIONS: Int = 1451
@@ -25,19 +26,15 @@ const val REQUEST_BLUETOOTH: Int = 1337
 const val REQUEST_DISCOVERABLE_BLUETOOTH: Int = 2137
 const val BLUETOOTH_REQUEST_DISABLE: String =
     "android.bluetooth.adapter.action.REQUEST_DISABLE"
+const val TAG = "FlutterBluetoothPlugin"
+const val NAMESPACE = "flutter_bluetooth_serial"
 
 /** FlutterBluetoothSerialPlugin */
 class FlutterBluetoothSerialPlugin :
     FlutterPlugin,
     MethodCallHandler,
     ActivityAware {
-//    private interface EnsurePermissionsCallback {
-//        fun onResult(granted: Boolean)
-//    }
-
     // Plugin
-    private val tag = "FlutterBluetoothPlugin"
-    private val namespace = "flutter_bluetooth_serial"
     private lateinit var channel: MethodChannel
     private var pendingResultForActivityResult: Result? = null
     private var pendingPermissionsEnsureCallback: ((Boolean) -> Unit)? = null
@@ -112,7 +109,7 @@ class FlutterBluetoothSerialPlugin :
         channel.setMethodCallHandler(this)
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "HardwareIds", "PrivateApi")
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
@@ -188,7 +185,150 @@ class FlutterBluetoothSerialPlugin :
                 ensurePermissions(result::success)
             }
 
-            // TODO: getAddress
+            "getAddress" -> {
+                val address: String? = bluetoothAdapter?.address
+
+                if (address != null && address != "02:00:00:00:00:00") {
+                    result.success(address)
+                    return
+                }
+
+                Log.d(
+                    TAG,
+                    "Local Bluetooth MAC address is hidden by system, " +
+                        "trying other options...",
+                )
+
+                try {
+                    // Requires `LOCAL_MAC_ADDRESS` which could be unavailable
+                    // for third party applications...
+                    val value: String? =
+                        Settings.Secure.getString(
+                            context.contentResolver,
+                            "bluetooth_address",
+                        )
+
+                    if (value != null) {
+                        result.success(value)
+                        return
+                    }
+                } catch (e: Exception) {
+                    // Ignoring failure
+                    // (since it isn't critical API for most applications)
+                    Log.d(
+                        TAG,
+                        "Obtaining address using Settings Secure " +
+                            "bank failed.",
+                    )
+                }
+
+                Log.d(
+                    TAG,
+                    "Trying to obtain address using reflection " +
+                        "against internal Android code",
+                )
+
+                try {
+                    val mServiceField =
+                        bluetoothAdapter
+                            ?.javaClass
+                            ?.getDeclaredField("mService")
+
+                    mServiceField?.isAccessible = true
+
+                    val bluetoothManagerService =
+                        mServiceField?.get(bluetoothAdapter)
+
+                    if (bluetoothManagerService == null) {
+                        if (bluetoothAdapter?.isEnabled != true) {
+                            Log.d(
+                                TAG,
+                                "Probably failed just because " +
+                                    "adapter is disabled!",
+                            )
+                        }
+
+                        throw NullPointerException(
+                            "bluetoothManagerService is null",
+                        )
+                    }
+
+                    val getAddressMethod =
+                        bluetoothManagerService
+                            .javaClass
+                            .getMethod("getAddress")
+
+                    val value: String? =
+                        getAddressMethod
+                            .invoke(bluetoothManagerService)
+                            ?.toString()
+
+                    if (value == null) {
+                        throw NullPointerException("getAddress returned null")
+                    }
+
+                    result.success(value)
+
+                    return
+                } catch (e: Throwable) {
+                    // Ignoring failure
+                    // (since it isn't critical API for most applications)
+                    Log.d(
+                        TAG,
+                        "Obtaining address using reflection against " +
+                            "internal Android code failed",
+                    )
+                }
+
+                Log.d(
+                    TAG,
+                    "Trying to look up address by network " +
+                        "interfaces - might be invalid on some devices",
+                )
+
+                try {
+                    // This method might return invalid MAC address
+                    // (since Bluetooth might use other address than WiFi).
+                    //
+                    // TODO: Further testing:
+                    //  1) check is while open connection,
+                    //  2) check other devices
+
+                    var value: String? = null
+
+                    NetworkInterface
+                        .getNetworkInterfaces()
+                        .iterator()
+                        .forEach {
+                            if (it.name.equals("wlan0", ignoreCase = true)
+                            ) {
+                                value =
+                                    it.hardwareAddress
+                                        ?.joinToString(":") { byte ->
+                                            "%02x".format(byte)
+                                        }
+                            }
+                        }
+
+                    if (value == null) {
+                        throw NullPointerException()
+                    }
+
+                    result.success(value)
+
+                    return
+                } catch (e: Exception) {
+                    // Ignoring failure
+                    // (since it isn't critical API for most applications)
+                    Log.d(
+                        TAG,
+                        "Looking for address by network " +
+                            "interfaces failed",
+                    )
+                }
+
+                result.success(null)
+            }
 
             "getState" -> {
                 result.success(bluetoothAdapter?.state ?: -1)

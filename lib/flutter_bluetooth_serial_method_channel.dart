@@ -39,6 +39,10 @@ class MethodChannelFlutterBluetoothSerial
       (await methodChannel.invokeMethod<bool>('ensurePermissions')) ?? false;
 
   @override
+  Future<String?> getAddress() =>
+      methodChannel.invokeMethod<String>('getAddress');
+
+  @override
   Future<BluetoothState> getState() async => BluetoothState.parse(
         (await methodChannel.invokeMethod<int>('getState')) ?? -2,
       );

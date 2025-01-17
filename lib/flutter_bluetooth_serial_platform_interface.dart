@@ -41,6 +41,10 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
     throw UnimplementedError('ensurePermissions() has not been implemented.');
   }
 
+  Future<String?> getAddress() {
+    throw UnimplementedError('getAddress() has not been implemented.');
+  }
+
   Future<BluetoothState> getState() {
     throw UnimplementedError('getState() has not been implemented.');
   }
