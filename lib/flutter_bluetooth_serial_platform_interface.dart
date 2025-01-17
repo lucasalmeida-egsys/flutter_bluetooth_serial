@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -34,5 +35,21 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
 
   Future<bool> requestDisable() {
     throw UnimplementedError('requestDisable() has not been implemented.');
+  }
+
+  Future<bool> ensurePermissions() {
+    throw UnimplementedError('ensurePermissions() has not been implemented.');
+  }
+
+  Future<BluetoothState> getState() {
+    throw UnimplementedError('getState() has not been implemented.');
+  }
+
+  Future<String?> getName() {
+    throw UnimplementedError('getName() has not been implemented.');
+  }
+
+  Future<bool> setName(final String name) {
+    throw UnimplementedError('setName() has not been implemented.');
   }
 }

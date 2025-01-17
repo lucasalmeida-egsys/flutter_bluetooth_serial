@@ -184,6 +184,44 @@ class FlutterBluetoothSerialPlugin :
                 }
             }
 
+            "ensurePermissions" -> {
+                ensurePermissions(result::success)
+            }
+
+            // TODO: getAddress
+
+            "getState" -> {
+                result.success(bluetoothAdapter?.state ?: -1)
+            }
+
+            "getName" -> {
+                result.success(bluetoothAdapter?.name)
+            }
+
+            "setName" -> {
+                if (call.hasArgument("name")) {
+                    try {
+                        result.success(
+                            bluetoothAdapter?.setName(
+                                call.argument("name"),
+                            ) ?: false,
+                        )
+                    } catch (e: Exception) {
+                        result.error(
+                            "invalid_argument",
+                            "'name' argument is required to be string",
+                            e,
+                        )
+                    }
+                } else {
+                    result.error(
+                        "invalid_argument",
+                        "argument 'name' not found",
+                        null,
+                    )
+                }
+            }
+
             else -> {
                 result.notImplemented()
             }

@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
 
 class FlutterBluetoothSerial {
@@ -15,4 +16,16 @@ class FlutterBluetoothSerial {
 
   Future<bool> requestDisable() =>
       FlutterBluetoothSerialPlatform.instance.requestDisable();
+
+  Future<bool> ensurePermissions() =>
+      FlutterBluetoothSerialPlatform.instance.ensurePermissions();
+
+  Future<BluetoothState> getState() =>
+      FlutterBluetoothSerialPlatform.instance.getState();
+
+  Future<String?> getName() =>
+      FlutterBluetoothSerialPlatform.instance.getName();
+
+  Future<bool> setName(final String name) =>
+      FlutterBluetoothSerialPlatform.instance.setName(name);
 }

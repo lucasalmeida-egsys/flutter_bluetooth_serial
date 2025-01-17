@@ -36,4 +36,12 @@ void main() {
   // TODO(anyone): requestEnable
 
   // TODO(anyone): requestDisable
+
+  // TODO(anyone): ensurePermissions
+
+  // TODO(anyone): getState
+
+  // TODO(anyone): getName
+
+  // TODO(anyone): setName
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: document_ignores, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:folly_fields/widgets/folly_dialogs.dart';
 
@@ -14,6 +15,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool _isAvailable = false;
   bool _isEnabled = false;
+  BluetoothState _state = BluetoothState.unknown;
+  String? _name = null;
 
   final FlutterBluetoothSerial _flutterBluetoothSerialPlugin =
       FlutterBluetoothSerial();
@@ -29,6 +32,10 @@ class _HomeState extends State<Home> {
 
     final bool isEnabled = await _flutterBluetoothSerialPlugin.isEnabled();
 
+    final BluetoothState state = await _flutterBluetoothSerialPlugin.getState();
+
+    final String? name = await _flutterBluetoothSerialPlugin.getName();
+
     if (!mounted) {
       return;
     }
@@ -36,6 +43,8 @@ class _HomeState extends State<Home> {
     setState(() {
       _isAvailable = isAvailable;
       _isEnabled = isEnabled;
+      _state = state;
+      _name = name;
     });
   }
 
@@ -45,7 +54,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Bluetooth Serial'),
-          actions: [
+          actions: <Widget>[
             IconButton(
               onPressed: initPlatformState,
               icon: const Icon(Icons.refresh),
@@ -58,10 +67,16 @@ class _HomeState extends State<Home> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // Available
-              Text('Bluetooth available: $_isAvailable'),
+              Text('Available: $_isAvailable'),
 
               // Enabled
-              Text('Bluetooth enabled: $_isEnabled'),
+              Text('Enabled: $_isEnabled'),
+
+              // State
+              Text('State: $_state'),
+
+              // Name
+              Text('Name: $_name'),
 
               // Open Settings
               ElevatedButton(
@@ -101,6 +116,47 @@ class _HomeState extends State<Home> {
                   await initPlatformState();
                 },
                 child: const Text('Request Disable'),
+              ),
+
+              // Ensure Permissions
+              ElevatedButton(
+                onPressed: () async {
+                  final bool ensurePermissions =
+                      await _flutterBluetoothSerialPlugin.ensurePermissions();
+
+                  await FollyDialogs.dialogMessage(
+                    context: context,
+                    title: 'Ensure Permissions',
+                    message: '$ensurePermissions',
+                  );
+
+                  await initPlatformState();
+                },
+                child: const Text('Ensure Permissions'),
+              ),
+
+              // Set Name
+              ElevatedButton(
+                onPressed: () async {
+                  final String name = await FollyDialogs.dialogText(
+                    context: context,
+                    title: 'Set Name',
+                    message: 'Set device name',
+                    cancelLabel: 'Cancel',
+                  );
+
+                  final bool setName =
+                      await _flutterBluetoothSerialPlugin.setName(name);
+
+                  await FollyDialogs.dialogMessage(
+                    context: context,
+                    title: 'Set Name',
+                    message: '$setName',
+                  );
+
+                  await initPlatformState();
+                },
+                child: const Text('Set Name'),
               ),
             ],
           ),
