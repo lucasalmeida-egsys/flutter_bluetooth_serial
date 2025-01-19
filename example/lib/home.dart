@@ -28,16 +28,21 @@ class _HomeState extends State<Home> {
     initPlatformState();
   }
 
-  Future<void> initPlatformState() async {
+  Future<void> initPlatformState({final bool force = false}) async {
     final bool isAvailable = await _flutterBluetoothSerialPlugin.isAvailable();
 
     final bool isEnabled = await _flutterBluetoothSerialPlugin.isEnabled();
 
-    final String? address = await _flutterBluetoothSerialPlugin.getAddress();
-
     final BluetoothState state = await _flutterBluetoothSerialPlugin.getState();
 
     final String? name = await _flutterBluetoothSerialPlugin.getName();
+
+    String? address;
+
+    if (force) {
+      // Doesn't work on my phone.
+      address = await _flutterBluetoothSerialPlugin.getAddress();
+    }
 
     if (!mounted) {
       return;
@@ -60,7 +65,7 @@ class _HomeState extends State<Home> {
           title: const Text('Flutter Bluetooth Serial'),
           actions: <Widget>[
             IconButton(
-              onPressed: initPlatformState,
+              onPressed: () => initPlatformState(force: true),
               icon: const Icon(Icons.refresh),
             )
           ],

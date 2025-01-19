@@ -35,7 +35,7 @@ class FlutterBluetoothSerialPlugin :
     MethodCallHandler,
     ActivityAware {
     // Plugin
-    private lateinit var channel: MethodChannel
+    private lateinit var methodChannel: MethodChannel
     private var pendingResultForActivityResult: Result? = null
     private var pendingPermissionsEnsureCallback: ((Boolean) -> Unit)? = null
 
@@ -101,12 +101,87 @@ class FlutterBluetoothSerialPlugin :
         flutterPluginBinding: FlutterPlugin.FlutterPluginBinding,
     ) {
         Log.v("FlutterBluetoothSerial", "Attached to engine")
-        channel =
+
+        methodChannel =
             MethodChannel(
                 flutterPluginBinding.binaryMessenger,
-                "flutter_bluetooth_serial",
+                "$NAMESPACE/methods",
             )
-        channel.setMethodCallHandler(this)
+
+        methodChannel.setMethodCallHandler(this)
+    }
+
+    override fun onDetachedFromEngine(
+        binding: FlutterPlugin.FlutterPluginBinding,
+    ) {
+        methodChannel.setMethodCallHandler(null)
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        this.activity = binding.activity
+        this.context = binding.activity.applicationContext
+
+        val manager =
+            activity.getSystemService(
+                Context.BLUETOOTH_SERVICE,
+            ) as BluetoothManager?
+
+        bluetoothAdapter = manager?.adapter
+
+        binding.addActivityResultListener { requestCode, resultCode, _ ->
+            when (requestCode) {
+                REQUEST_BLUETOOTH -> {
+                    pendingResultForActivityResult?.success(resultCode != 0)
+                    true
+                }
+
+//                REQUEST_DISCOVERABLE_BLUETOOTH -> {
+//                    pendingResultForActivityResult?.success(
+//                        // TODO: This if is really necessary?
+//                        if (resultCode == 0) {
+//                            -1
+//                        } else {
+//                            resultCode
+//                        },
+//                    )
+//                    true
+//                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+
+        binding.addRequestPermissionsResultListener {
+            requestCode,
+            _,
+            grantResults,
+            ->
+            when (requestCode) {
+                REQUEST_BLUETOOTH_PERMISSIONS -> {
+                    pendingPermissionsEnsureCallback?.let {
+                        it(checkGranted(grantResults))
+                    }
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+    }
+
+    override fun onReattachedToActivityForConfigChanges(
+        binding: ActivityPluginBinding,
+    ) {
+    }
+
+    override fun onDetachedFromActivity() {
     }
 
     @SuppressLint("MissingPermission", "HardwareIds", "PrivateApi")
@@ -366,78 +441,5 @@ class FlutterBluetoothSerialPlugin :
                 result.notImplemented()
             }
         }
-    }
-
-    override fun onDetachedFromEngine(
-        binding: FlutterPlugin.FlutterPluginBinding,
-    ) {
-        channel.setMethodCallHandler(null)
-    }
-
-    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        this.activity = binding.activity
-        this.context = binding.activity.applicationContext
-
-        val manager =
-            activity.getSystemService(
-                Context.BLUETOOTH_SERVICE,
-            ) as BluetoothManager?
-
-        bluetoothAdapter = manager?.adapter
-
-        binding.addActivityResultListener { requestCode, resultCode, _ ->
-            when (requestCode) {
-                REQUEST_BLUETOOTH -> {
-                    pendingResultForActivityResult?.success(resultCode != 0)
-                    true
-                }
-
-//                REQUEST_DISCOVERABLE_BLUETOOTH -> {
-//                    pendingResultForActivityResult?.success(
-//                        // TODO: This if is really necessary?
-//                        if (resultCode == 0) {
-//                            -1
-//                        } else {
-//                            resultCode
-//                        },
-//                    )
-//                    true
-//                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-        binding.addRequestPermissionsResultListener {
-            requestCode,
-            _,
-            grantResults,
-            ->
-            when (requestCode) {
-                REQUEST_BLUETOOTH_PERMISSIONS -> {
-                    pendingPermissionsEnsureCallback?.let {
-                        it(checkGranted(grantResults))
-                    }
-                    true
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-    }
-
-    override fun onDetachedFromActivityForConfigChanges() {
-    }
-
-    override fun onReattachedToActivityForConfigChanges(
-        binding: ActivityPluginBinding,
-    ) {
-    }
-
-    override fun onDetachedFromActivity() {
     }
 }

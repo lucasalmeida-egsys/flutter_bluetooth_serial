@@ -6,9 +6,10 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_inter
 
 class MethodChannelFlutterBluetoothSerial
     extends FlutterBluetoothSerialPlatform {
+  static const String namespace = 'flutter_bluetooth_serial';
+
   @visibleForTesting
-  final MethodChannel methodChannel =
-      const MethodChannel('flutter_bluetooth_serial');
+  final MethodChannel methodChannel = const MethodChannel('$namespace/methods');
 
   @override
   Future<bool> isAvailable() async {
