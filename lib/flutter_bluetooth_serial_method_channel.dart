@@ -13,10 +13,7 @@ class MethodChannelFlutterBluetoothSerial
 
   @override
   Stream<BluetoothState> onStateChanged() {
-
-    return stateChannel
-        .receiveBroadcastStream()
-        .map(BluetoothState.parse);
+    return stateChannel.receiveBroadcastStream().map(BluetoothState.parse);
   }
 
   @visibleForTesting
@@ -69,4 +66,8 @@ class MethodChannelFlutterBluetoothSerial
         <String, dynamic>{'name': name},
       )) ??
       false;
+
+  @override
+  Future<bool> isDiscoverable() async =>
+      (await methodChannel.invokeMethod<bool>('isDiscoverable')) ?? false;
 }

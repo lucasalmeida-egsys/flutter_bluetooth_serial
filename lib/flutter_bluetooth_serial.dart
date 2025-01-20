@@ -34,4 +34,7 @@ class FlutterBluetoothSerial {
 
   Future<bool> setName(final String name) =>
       FlutterBluetoothSerialPlatform.instance.setName(name);
+
+  Future<bool> isDiscoverable() =>
+      FlutterBluetoothSerialPlatform.instance.isDiscoverable();
 }

@@ -18,6 +18,7 @@ class _HomeState extends State<Home> {
   BluetoothState _state = BluetoothState.unknown;
   String? _name;
   String? _address;
+  bool _isDiscoverable = false;
 
   final FlutterBluetoothSerial _flutterBluetoothSerialPlugin =
       FlutterBluetoothSerial();
@@ -44,6 +45,9 @@ class _HomeState extends State<Home> {
       address = await _flutterBluetoothSerialPlugin.getAddress();
     }
 
+    final bool isDiscoverable =
+        await _flutterBluetoothSerialPlugin.isDiscoverable();
+
     if (!mounted) {
       return;
     }
@@ -54,6 +58,7 @@ class _HomeState extends State<Home> {
       _address = address;
       _state = state;
       _name = name;
+      _isDiscoverable = isDiscoverable;
     });
   }
 
@@ -105,6 +110,9 @@ class _HomeState extends State<Home> {
 
               // Name
               Text('Name: $_name'),
+
+              // Discoverable
+              Text('Discoverable: $_isDiscoverable'),
 
               // Open Settings
               ElevatedButton(

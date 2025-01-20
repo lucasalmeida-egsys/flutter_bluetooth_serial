@@ -414,6 +414,13 @@ class BluetoothMethodsWrapper(
                 }
             }
 
+            "isDiscoverable" -> {
+                result.success(
+                    bluetoothAdapter?.scanMode ==
+                        BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+                )
+            }
+
             // TODO: getDeviceBondState
 
             // TODO: removeDeviceBond
@@ -429,8 +436,6 @@ class BluetoothMethodsWrapper(
             // TODO: startDiscovery
 
             // TODO: cancelDiscovery
-
-            // TODO: isDiscoverable
 
             // TODO: requestDiscoverable
 

@@ -52,4 +52,6 @@ void main() {
   // TODO(anyone): getName
 
   // TODO(anyone): setName
+
+  // TODO(anyone): isDiscoverable
 }

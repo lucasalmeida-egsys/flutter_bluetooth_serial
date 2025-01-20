@@ -60,4 +60,8 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
   Future<bool> setName(final String name) {
     throw UnimplementedError('setName() has not been implemented.');
   }
+
+  Future<bool> isDiscoverable() {
+    throw UnimplementedError('isDiscoverable() has not been implemented.');
+  }
 }

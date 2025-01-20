@@ -42,6 +42,9 @@ class MockFlutterBluetoothSerialPlatform
 
   @override
   Future<bool> setName(final String name) => Future<bool>.value(true);
+
+  @override
+  Future<bool> isDiscoverable() => Future<bool>.value(true);
 }
 
 void main() {
@@ -86,4 +89,6 @@ void main() {
   // TODO(anyone): getName
 
   // TODO(anyone): setName
+
+  // TODO(anyone): isDiscoverable
 }

@@ -55,13 +55,15 @@ class BluetoothStateWrapper(
     override fun onCancel(obj: Any?) {
         Log.d(TAG, "Canceling listening to bluetooth state changes.")
 
-        stateSink = null
-
         try {
             activity.applicationContext.unregisterReceiver(this)
         } catch (t: Throwable) {
             // Ignore any kind of Throwable.
         }
+
+        // TODO: Check if necessary.
+        //  stateSink?.endOfStream()
+        stateSink = null
     }
 
     override fun onReceive(
