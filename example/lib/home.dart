@@ -67,7 +67,7 @@ class _HomeState extends State<Home> {
             IconButton(
               onPressed: () => initPlatformState(force: true),
               icon: const Icon(Icons.refresh),
-            )
+            ),
           ],
         ),
         body: SingleChildScrollView(
@@ -86,6 +86,22 @@ class _HomeState extends State<Home> {
 
               // State
               Text('State: $_state'),
+
+              // State Stream
+              StreamBuilder<BluetoothState>(
+                initialData: _state,
+                stream: _flutterBluetoothSerialPlugin.onStateChanged(),
+                builder: (
+                  final BuildContext context,
+                  final AsyncSnapshot<BluetoothState> snapshot,
+                ) {
+                  if (snapshot.hasData) {
+                    return Text('State Stream: ${snapshot.data}');
+                  }
+
+                  return const Text('State Stream: Unknown!!');
+                },
+              ),
 
               // Name
               Text('Name: $_name'),

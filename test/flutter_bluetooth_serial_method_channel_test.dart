@@ -5,10 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  const String namespace = 'flutter_bluetooth_serial';
+
+  // TODO(anyone): stateChannel
+
   final MethodChannelFlutterBluetoothSerial platform =
       MethodChannelFlutterBluetoothSerial();
 
-  const MethodChannel channel = MethodChannel('flutter_bluetooth_serial');
+  const MethodChannel channel = MethodChannel('$namespace/methods');
 
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -24,6 +28,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
+
+  // TODO(anyone): onStateChanged
 
   test('isAvailable', () async {
     expect(await platform.isAvailable(), true);

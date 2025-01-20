@@ -2,6 +2,9 @@ import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
 
 class FlutterBluetoothSerial {
+  Stream<BluetoothState> onStateChanged() =>
+      FlutterBluetoothSerialPlatform.instance.onStateChanged();
+
   Future<bool> isAvailable() =>
       FlutterBluetoothSerialPlatform.instance.isAvailable();
 

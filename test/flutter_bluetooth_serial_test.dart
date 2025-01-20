@@ -9,6 +9,10 @@ class MockFlutterBluetoothSerialPlatform
     with MockPlatformInterfaceMixin
     implements FlutterBluetoothSerialPlatform {
   @override
+  Stream<BluetoothState> onStateChanged() =>
+      Stream<BluetoothState>.value(BluetoothState.on);
+
+  @override
   Future<bool> isAvailable() => Future<bool>.value(true);
 
   @override
@@ -50,6 +54,8 @@ void main() {
       isInstanceOf<MethodChannelFlutterBluetoothSerial>(),
     );
   });
+
+  // TODO(anyone): onStateChanged
 
   test('isAvailable', () async {
     final FlutterBluetoothSerial flutterBluetoothSerialPlugin =

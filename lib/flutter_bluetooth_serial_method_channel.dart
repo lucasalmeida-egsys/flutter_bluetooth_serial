@@ -9,6 +9,17 @@ class MethodChannelFlutterBluetoothSerial
   static const String namespace = 'flutter_bluetooth_serial';
 
   @visibleForTesting
+  final EventChannel stateChannel = const EventChannel('$namespace/state');
+
+  @override
+  Stream<BluetoothState> onStateChanged() {
+
+    return stateChannel
+        .receiveBroadcastStream()
+        .map(BluetoothState.parse);
+  }
+
+  @visibleForTesting
   final MethodChannel methodChannel = const MethodChannel('$namespace/methods');
 
   @override

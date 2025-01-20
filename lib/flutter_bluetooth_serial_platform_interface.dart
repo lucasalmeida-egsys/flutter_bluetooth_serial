@@ -17,6 +17,10 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Stream<BluetoothState> onStateChanged() {
+    throw UnimplementedError('onStateChanged() has not been implemented.');
+  }
+
   Future<bool> isAvailable() {
     throw UnimplementedError('isAvailable() has not been implemented.');
   }

@@ -10,9 +10,12 @@ enum BluetoothState {
 
   const BluetoothState(this.value);
 
-  static BluetoothState parse(final int value) {
+  static BluetoothState parse(final dynamic value) {
+    final int intValue =
+        int.tryParse(value.toString()) ?? BluetoothState.unknown.value;
+
     return BluetoothState.values.firstWhere(
-      (final BluetoothState e) => e.value == value,
+      (final BluetoothState e) => e.value == intValue,
       orElse: () => BluetoothState.unknown,
     );
   }
