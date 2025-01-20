@@ -37,4 +37,8 @@ class FlutterBluetoothSerial {
 
   Future<bool> isDiscoverable() =>
       FlutterBluetoothSerialPlatform.instance.isDiscoverable();
+
+  Future<int?> requestDiscoverable({final int? durationInSeconds}) =>
+      FlutterBluetoothSerialPlatform.instance
+          .requestDiscoverable(durationInSeconds: durationInSeconds);
 }

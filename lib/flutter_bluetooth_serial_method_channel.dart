@@ -70,4 +70,15 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Future<bool> isDiscoverable() async =>
       (await methodChannel.invokeMethod<bool>('isDiscoverable')) ?? false;
+
+  @override
+  Future<int?> requestDiscoverable({final int? durationInSeconds}) =>
+      methodChannel.invokeMethod<int>(
+        'requestDiscoverable',
+        durationInSeconds == null
+            ? null
+            : <String, dynamic>{
+                'duration': durationInSeconds,
+              },
+      );
 }

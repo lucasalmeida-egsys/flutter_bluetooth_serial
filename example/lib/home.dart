@@ -194,6 +194,31 @@ class _HomeState extends State<Home> {
                 },
                 child: const Text('Set Name'),
               ),
+
+              // Request Discoverable
+              ElevatedButton(
+                onPressed: () async {
+                  // TODO(anyone): Send duration in seconds.
+                  // final String name = await FollyDialogs.dialogText(
+                  //   context: context,
+                  //   title: 'Set Name',
+                  //   message: 'Set device name',
+                  //   cancelLabel: 'Cancel',
+                  // );
+
+                  final int? discoverableTime =
+                      await _flutterBluetoothSerialPlugin.requestDiscoverable();
+
+                  await FollyDialogs.dialogMessage(
+                    context: context,
+                    title: 'Request Discoverable',
+                    message: 'Discoverable Time: $discoverableTime',
+                  );
+
+                  await initPlatformState();
+                },
+                child: const Text('Request Discoverable'),
+              ),
             ],
           ),
         ),

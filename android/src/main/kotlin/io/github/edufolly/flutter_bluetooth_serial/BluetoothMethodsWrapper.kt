@@ -71,17 +71,17 @@ class BluetoothMethodsWrapper(
                 true
             }
 
-//                REQUEST_DISCOVERABLE_BLUETOOTH -> {
-//                    pendingResultForActivityResult?.success(
-//                        // TODO: This if is really necessary?
-//                        if (resultCode == 0) {
-//                            -1
-//                        } else {
-//                            resultCode
-//                        },
-//                    )
-//                    true
-//                }
+            REQUEST_DISCOVERABLE_BLUETOOTH -> {
+                pendingResultForActivityResult?.success(
+                    // TODO: This if is really necessary?
+                    if (resultCode == 0) {
+                        -1
+                    } else {
+                        resultCode
+                    },
+                )
+                true
+            }
 
             else -> {
                 false
@@ -421,6 +421,37 @@ class BluetoothMethodsWrapper(
                 )
             }
 
+            "requestDiscoverable" -> {
+                // TODO: Need to ensurePermissions?
+
+                val intent =
+                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+
+                if (call.hasArgument("duration")) {
+                    try {
+                        intent.putExtra(
+                            BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                            call.argument<Int>("duration"),
+                        )
+                    } catch (e: ClassCastException) {
+                        result.error(
+                            "invalid_argument",
+                            "'duration' argument is required to be integer",
+                            null,
+                        )
+
+                        return
+                    }
+                }
+
+                pendingResultForActivityResult = result
+
+                activity.startActivityForResult(
+                    intent,
+                    REQUEST_DISCOVERABLE_BLUETOOTH,
+                )
+            }
+
             // TODO: getDeviceBondState
 
             // TODO: removeDeviceBond
@@ -436,8 +467,6 @@ class BluetoothMethodsWrapper(
             // TODO: startDiscovery
 
             // TODO: cancelDiscovery
-
-            // TODO: requestDiscoverable
 
             // TODO: connect
 

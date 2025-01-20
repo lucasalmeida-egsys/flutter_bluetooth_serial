@@ -9,6 +9,8 @@ void main() {
 
   // TODO(anyone): stateChannel
 
+  // TODO(anyone): discoveryChannel
+
   final MethodChannelFlutterBluetoothSerial platform =
       MethodChannelFlutterBluetoothSerial();
 
@@ -54,4 +56,6 @@ void main() {
   // TODO(anyone): setName
 
   // TODO(anyone): isDiscoverable
+
+  // TODO(anyone): requestDiscoverable
 }
