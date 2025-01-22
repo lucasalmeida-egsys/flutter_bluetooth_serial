@@ -81,4 +81,8 @@ class MethodChannelFlutterBluetoothSerial
                 'duration': durationInSeconds,
               },
       );
+
+  @override
+  Future<bool> isDiscovering() async =>
+      (await methodChannel.invokeMethod<bool>('isDiscovering')) ?? false;
 }

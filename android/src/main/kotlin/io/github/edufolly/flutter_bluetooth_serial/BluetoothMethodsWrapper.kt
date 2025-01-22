@@ -73,12 +73,7 @@ class BluetoothMethodsWrapper(
 
             REQUEST_DISCOVERABLE_BLUETOOTH -> {
                 pendingResultForActivityResult?.success(
-                    // TODO: This if is really necessary?
-                    if (resultCode == 0) {
-                        -1
-                    } else {
-                        resultCode
-                    },
+                    if (resultCode == 0) -1 else resultCode,
                 )
                 true
             }
@@ -113,12 +108,18 @@ class BluetoothMethodsWrapper(
 //            "location"
 //        }
 
-    private fun checkPermissions(permissions: Array<String>): Boolean =
+    private fun checkPermissions(vararg permissions: String): Boolean =
         checkGranted(
             permissions
                 .map { activity.checkSelfPermission(it) }
                 .toIntArray(),
         )
+//    private fun checkPermissions(permissions: Array<String>): Boolean =
+//        checkGranted(
+//            permissions
+//                .map { activity.checkSelfPermission(it) }
+//                .toIntArray(),
+//        )
 
     private fun checkGranted(permissions: IntArray): Boolean =
         permissions.fold(true) { acc, permission ->
@@ -144,7 +145,7 @@ class BluetoothMethodsWrapper(
                 }
             }
 
-        if (!checkPermissions(permissions)) {
+        if (!checkPermissions(*permissions)) {
             pendingPermissionsEnsureCallback = callback
 
             activity.requestPermissions(
@@ -177,12 +178,9 @@ class BluetoothMethodsWrapper(
         }
 
         when (call.method) {
-            // <editor-fold desc="isAvailable">
             "isAvailable" -> {
                 result.success(true)
             }
-
-            // </editor-fold>
 
             "isEnabled" -> {
                 result.success(bluetoothAdapter?.isEnabled ?: false)
@@ -238,6 +236,11 @@ class BluetoothMethodsWrapper(
             }
 
             "getAddress" -> {
+                if (!checkPermissions(Manifest.permission.BLUETOOTH_CONNECT)) {
+                    result.success(null)
+                    return
+                }
+
                 val address: String? = bluetoothAdapter?.address
 
                 if (address != null && address != "02:00:00:00:00:00") {
@@ -387,70 +390,102 @@ class BluetoothMethodsWrapper(
             }
 
             "getName" -> {
-                result.success(bluetoothAdapter?.name)
+                if (checkPermissions(Manifest.permission.BLUETOOTH_CONNECT)) {
+                    result.success(bluetoothAdapter?.name)
+                } else {
+                    result.success(null)
+                }
             }
 
             "setName" -> {
-                if (call.hasArgument("name")) {
-                    try {
-                        result.success(
-                            bluetoothAdapter?.setName(
-                                call.argument("name"),
-                            ) ?: false,
-                        )
-                    } catch (e: Exception) {
+                if (checkPermissions(Manifest.permission.BLUETOOTH_CONNECT)) {
+                    if (call.hasArgument("name")) {
+                        try {
+                            result.success(
+                                bluetoothAdapter?.setName(
+                                    call.argument("name"),
+                                ) ?: false,
+                            )
+                        } catch (e: Exception) {
+                            result.error(
+                                "invalid_argument",
+                                "'name' argument is required to be string",
+                                e,
+                            )
+                        }
+                    } else {
                         result.error(
                             "invalid_argument",
-                            "'name' argument is required to be string",
-                            e,
+                            "argument 'name' not found",
+                            null,
                         )
                     }
                 } else {
                     result.error(
-                        "invalid_argument",
-                        "argument 'name' not found",
+                        "invalid_permissions",
+                        "BLUETOOTH_CONNECT permission is required",
                         null,
                     )
                 }
             }
 
             "isDiscoverable" -> {
-                result.success(
-                    bluetoothAdapter?.scanMode ==
-                        BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
-                )
+                if (checkPermissions(Manifest.permission.BLUETOOTH_SCAN)) {
+                    result.success(
+                        bluetoothAdapter?.scanMode ==
+                            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
+                    )
+                } else {
+                    result.success(false)
+                }
             }
 
             "requestDiscoverable" -> {
-                // TODO: Need to ensurePermissions?
+                ensurePermissions({ granted ->
+                    if (granted) {
+                        val intent =
+                            Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
 
-                val intent =
-                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+                        var duration: Int? = null
 
-                if (call.hasArgument("duration")) {
-                    try {
-                        intent.putExtra(
-                            BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
-                            call.argument<Int>("duration"),
+                        if (call.hasArgument("duration")) {
+                            try {
+                                duration = call.argument<Int>("duration")
+                            } catch (e: ClassCastException) {
+                                Log.d(TAG, "Invalid duration argument: $e")
+                            }
+                        }
+
+                        if (duration != null) {
+                            intent.putExtra(
+                                BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                                duration,
+                            )
+                        }
+
+                        pendingResultForActivityResult = result
+
+                        activity.startActivityForResult(
+                            intent,
+                            REQUEST_DISCOVERABLE_BLUETOOTH,
                         )
-                    } catch (e: ClassCastException) {
-                        result.error(
-                            "invalid_argument",
-                            "'duration' argument is required to be integer",
-                            null,
-                        )
-
-                        return
+                    } else {
+                        result.success(-1)
                     }
-                }
-
-                pendingResultForActivityResult = result
-
-                activity.startActivityForResult(
-                    intent,
-                    REQUEST_DISCOVERABLE_BLUETOOTH,
-                )
+                })
             }
+
+            "isDiscovering" -> {
+                if (checkPermissions(Manifest.permission.BLUETOOTH_SCAN)) {
+                    result.success(bluetoothAdapter?.isDiscovering == true)
+                } else {
+                    result.success(false)
+                }
+            }
+
+            // TODO: startDiscovery
+
+            // TODO: cancelDiscovery
 
             // TODO: getDeviceBondState
 
@@ -461,12 +496,6 @@ class BluetoothMethodsWrapper(
             // TODO: pairingRequestHandlingEnable
 
             // TODO: getBondedDevices
-
-            // TODO: isDiscovering
-
-            // TODO: startDiscovery
-
-            // TODO: cancelDiscovery
 
             // TODO: connect
 

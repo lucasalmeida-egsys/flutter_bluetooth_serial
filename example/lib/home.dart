@@ -1,5 +1,6 @@
 // ignore_for_file: document_ignores, use_build_context_synchronously
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -19,6 +20,7 @@ class _HomeState extends State<Home> {
   String? _name;
   String? _address;
   bool _isDiscoverable = false;
+  bool _isDiscovering = false;
 
   final FlutterBluetoothSerial _flutterBluetoothSerialPlugin =
       FlutterBluetoothSerial();
@@ -42,11 +44,18 @@ class _HomeState extends State<Home> {
 
     if (force) {
       // Doesn't work on my phone.
-      address = await _flutterBluetoothSerialPlugin.getAddress();
+      try {
+        address = await _flutterBluetoothSerialPlugin.getAddress();
+      } on Exception {
+        // Nothing to do.
+      }
     }
 
     final bool isDiscoverable =
         await _flutterBluetoothSerialPlugin.isDiscoverable();
+
+    final bool isDiscovering =
+        await _flutterBluetoothSerialPlugin.isDiscovering();
 
     if (!mounted) {
       return;
@@ -59,6 +68,7 @@ class _HomeState extends State<Home> {
       _state = state;
       _name = name;
       _isDiscoverable = isDiscoverable;
+      _isDiscovering = isDiscovering;
     });
   }
 
@@ -104,7 +114,7 @@ class _HomeState extends State<Home> {
                     return Text('State Stream: ${snapshot.data}');
                   }
 
-                  return const Text('State Stream: Unknown!!');
+                  return const Text('State Stream: Empty');
                 },
               ),
 
@@ -113,6 +123,9 @@ class _HomeState extends State<Home> {
 
               // Discoverable
               Text('Discoverable: $_isDiscoverable'),
+
+              // Discovering
+              Text('Discovering: $_isDiscovering'),
 
               // Open Settings
               ElevatedButton(
@@ -181,14 +194,27 @@ class _HomeState extends State<Home> {
                     cancelLabel: 'Cancel',
                   );
 
-                  final bool setName =
-                      await _flutterBluetoothSerialPlugin.setName(name);
+                  try {
+                    final bool setName =
+                        await _flutterBluetoothSerialPlugin.setName(name);
 
-                  await FollyDialogs.dialogMessage(
-                    context: context,
-                    title: 'Set Name',
-                    message: '$setName',
-                  );
+                    await FollyDialogs.dialogMessage(
+                      context: context,
+                      title: 'Set Name',
+                      message: '$setName',
+                    );
+                  } on Exception catch (e, s) {
+                    if (kDebugMode) {
+                      print(e);
+                      print(s);
+                    }
+
+                    await FollyDialogs.dialogMessage(
+                      context: context,
+                      title: 'Error',
+                      message: '$e',
+                    );
+                  }
 
                   await initPlatformState();
                 },
@@ -198,16 +224,17 @@ class _HomeState extends State<Home> {
               // Request Discoverable
               ElevatedButton(
                 onPressed: () async {
-                  // TODO(anyone): Send duration in seconds.
-                  // final String name = await FollyDialogs.dialogText(
-                  //   context: context,
-                  //   title: 'Set Name',
-                  //   message: 'Set device name',
-                  //   cancelLabel: 'Cancel',
-                  // );
+                  final String duration = await FollyDialogs.dialogText(
+                    context: context,
+                    title: 'Request Discoverable',
+                    message: 'Set duration in seconds',
+                    cancelLabel: 'Cancel',
+                  );
 
                   final int? discoverableTime =
-                      await _flutterBluetoothSerialPlugin.requestDiscoverable();
+                      await _flutterBluetoothSerialPlugin.requestDiscoverable(
+                    durationInSeconds: int.tryParse(duration),
+                  );
 
                   await FollyDialogs.dialogMessage(
                     context: context,

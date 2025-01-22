@@ -58,4 +58,7 @@ void main() {
   // TODO(anyone): isDiscoverable
 
   // TODO(anyone): requestDiscoverable
+
+  // TODO(anyone): isDiscovering
+
 }
