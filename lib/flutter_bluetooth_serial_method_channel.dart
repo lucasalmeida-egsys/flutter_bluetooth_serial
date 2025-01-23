@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
@@ -14,6 +17,18 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Stream<BluetoothState> onStateChanged() {
     return stateChannel.receiveBroadcastStream().map(BluetoothState.parse);
+  }
+
+  @visibleForTesting
+  final EventChannel discoveryChannel =
+      const EventChannel('$namespace/discovery');
+
+  @override
+  Stream<BluetoothDiscoveryResult> onDiscovery() {
+    return discoveryChannel.receiveBroadcastStream().map(
+          (final dynamic e) =>
+              BluetoothDiscoveryResult.fromMap(e as Map<dynamic, dynamic>),
+        );
   }
 
   @visibleForTesting
@@ -85,4 +100,12 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Future<bool> isDiscovering() async =>
       (await methodChannel.invokeMethod<bool>('isDiscovering')) ?? false;
+
+  @override
+  Future<bool> startDiscovery() async =>
+      (await methodChannel.invokeMethod<bool>('startDiscovery')) ?? false;
+
+  @override
+  Future<bool> stopDiscovery() async =>
+      (await methodChannel.invokeMethod<bool>('stopDiscovery')) ?? false;
 }

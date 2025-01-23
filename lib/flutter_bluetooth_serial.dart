@@ -1,9 +1,13 @@
+import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
 
 class FlutterBluetoothSerial {
   Stream<BluetoothState> onStateChanged() =>
       FlutterBluetoothSerialPlatform.instance.onStateChanged();
+
+  Stream<BluetoothDiscoveryResult> onDiscovery() =>
+      FlutterBluetoothSerialPlatform.instance.onDiscovery();
 
   Future<bool> isAvailable() =>
       FlutterBluetoothSerialPlatform.instance.isAvailable();
@@ -44,4 +48,10 @@ class FlutterBluetoothSerial {
 
   Future<bool> isDiscovering() =>
       FlutterBluetoothSerialPlatform.instance.isDiscovering();
+
+  Future<bool> startDiscovery() =>
+      FlutterBluetoothSerialPlatform.instance.startDiscovery();
+
+  Future<bool> stopDiscovery() =>
+      FlutterBluetoothSerialPlatform.instance.stopDiscovery();
 }

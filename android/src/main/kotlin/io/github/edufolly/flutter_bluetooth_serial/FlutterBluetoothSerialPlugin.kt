@@ -21,8 +21,9 @@ class FlutterBluetoothSerialPlugin :
     // Maps ID of the connection with plugin data channels.
     private val connections = mutableSetOf<BluetoothConnection>()
 
-    private lateinit var methodsWrapper: BluetoothMethodsWrapper
+    private lateinit var discoveryWrapper: BluetoothDiscoveryWrapper
     private lateinit var stateWrapper: BluetoothStateWrapper
+    private lateinit var methodsWrapper: BluetoothMethodsWrapper
 
     override fun onAttachedToEngine(
         flutterPluginBinding: FlutterPlugin.FlutterPluginBinding,
@@ -31,7 +32,7 @@ class FlutterBluetoothSerialPlugin :
 
         val messenger = flutterPluginBinding.binaryMessenger
 
-        methodsWrapper = BluetoothMethodsWrapper(messenger)
+        discoveryWrapper = BluetoothDiscoveryWrapper(messenger)
 
         stateWrapper =
             BluetoothStateWrapper(
@@ -42,11 +43,15 @@ class FlutterBluetoothSerialPlugin :
                     connections.clear()
                 },
             )
+
+        methodsWrapper = BluetoothMethodsWrapper(messenger)
     }
 
     override fun onDetachedFromEngine(
         binding: FlutterPlugin.FlutterPluginBinding,
     ) {
+        discoveryWrapper.close()
+
         stateWrapper.close()
 
         methodsWrapper.close()
@@ -62,9 +67,11 @@ class FlutterBluetoothSerialPlugin :
 
         val bluetoothAdapter = manager?.adapter
 
-        methodsWrapper.config(activity, bluetoothAdapter)
+        discoveryWrapper.config(activity, bluetoothAdapter)
 
         stateWrapper.config(activity)
+
+        methodsWrapper.config(activity, discoveryWrapper, bluetoothAdapter)
 
         binding.addActivityResultListener(methodsWrapper)
 

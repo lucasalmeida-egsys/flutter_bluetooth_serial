@@ -142,10 +142,10 @@ class BluetoothDiscoveryWrapper(
 
         activity.applicationContext.registerReceiver(
             this,
-            IntentFilter(
-                BluetoothDevice.ACTION_FOUND,
-                BluetoothAdapter.ACTION_DISCOVERY_FINISHED,
-            ),
+            IntentFilter().apply {
+                addAction(BluetoothDevice.ACTION_FOUND)
+                addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            },
         )
 
         bluetoothAdapter?.startDiscovery()

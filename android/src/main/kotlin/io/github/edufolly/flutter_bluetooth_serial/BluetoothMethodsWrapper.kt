@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -44,15 +43,17 @@ class BluetoothMethodsWrapper(
 
     private lateinit var activity: Activity
 
-    private lateinit var context: Context
+    private lateinit var discoveryWrapper: BluetoothDiscoveryWrapper
 
     private var bluetoothAdapter: BluetoothAdapter? = null
 
     fun config(
         activity: Activity,
+        discoveryWrapper: BluetoothDiscoveryWrapper,
         bluetoothAdapter: BluetoothAdapter?,
     ) {
         this.activity = activity
+        this.discoveryWrapper = discoveryWrapper
         this.bluetoothAdapter = bluetoothAdapter
     }
 
@@ -114,12 +115,6 @@ class BluetoothMethodsWrapper(
                 .map { activity.checkSelfPermission(it) }
                 .toIntArray(),
         )
-//    private fun checkPermissions(permissions: Array<String>): Boolean =
-//        checkGranted(
-//            permissions
-//                .map { activity.checkSelfPermission(it) }
-//                .toIntArray(),
-//        )
 
     private fun checkGranted(permissions: IntArray): Boolean =
         permissions.fold(true) { acc, permission ->
@@ -259,7 +254,7 @@ class BluetoothMethodsWrapper(
                     // for third party applications...
                     val value: String? =
                         Settings.Secure.getString(
-                            context.contentResolver,
+                            activity.contentResolver,
                             "bluetooth_address",
                         )
 
@@ -483,9 +478,29 @@ class BluetoothMethodsWrapper(
                 }
             }
 
-            // TODO: startDiscovery
+            "startDiscovery" -> {
+                ensurePermissions({ granted ->
+                    if (granted) {
+                        discoveryWrapper.startDiscovery()
 
-            // TODO: cancelDiscovery
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                })
+            }
+
+            "stopDiscovery" -> {
+                ensurePermissions({ granted ->
+                    if (granted) {
+                        discoveryWrapper.stopDiscovery()
+
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                })
+            }
 
             // TODO: getDeviceBondState
 

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_bluetooth_serial_example/discovery.dart';
 import 'package:folly_fields/widgets/folly_dialogs.dart';
 
 class Home extends StatefulWidget {
@@ -20,7 +21,6 @@ class _HomeState extends State<Home> {
   String? _name;
   String? _address;
   bool _isDiscoverable = false;
-  bool _isDiscovering = false;
 
   final FlutterBluetoothSerial _flutterBluetoothSerialPlugin =
       FlutterBluetoothSerial();
@@ -54,9 +54,6 @@ class _HomeState extends State<Home> {
     final bool isDiscoverable =
         await _flutterBluetoothSerialPlugin.isDiscoverable();
 
-    final bool isDiscovering =
-        await _flutterBluetoothSerialPlugin.isDiscovering();
-
     if (!mounted) {
       return;
     }
@@ -68,7 +65,6 @@ class _HomeState extends State<Home> {
       _state = state;
       _name = name;
       _isDiscoverable = isDiscoverable;
-      _isDiscovering = isDiscovering;
     });
   }
 
@@ -86,7 +82,7 @@ class _HomeState extends State<Home> {
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -123,9 +119,6 @@ class _HomeState extends State<Home> {
 
               // Discoverable
               Text('Discoverable: $_isDiscoverable'),
-
-              // Discovering
-              Text('Discovering: $_isDiscovering'),
 
               // Open Settings
               ElevatedButton(
@@ -245,6 +238,18 @@ class _HomeState extends State<Home> {
                   await initPlatformState();
                 },
                 child: const Text('Request Discoverable'),
+              ),
+
+              // Discovery
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (final _) => const Discovery(),
+                    ),
+                  );
+                },
+                child: const Text('Discovery'),
               ),
             ],
           ),

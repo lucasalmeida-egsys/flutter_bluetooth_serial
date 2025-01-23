@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
@@ -11,6 +12,12 @@ class MockFlutterBluetoothSerialPlatform
   @override
   Stream<BluetoothState> onStateChanged() =>
       Stream<BluetoothState>.value(BluetoothState.on);
+
+  @override
+  Stream<BluetoothDiscoveryResult> onDiscovery() =>
+      Stream<BluetoothDiscoveryResult>.value(
+        const BluetoothDiscoveryResult(address: '00:00:00:00:00:00'),
+      );
 
   @override
   Future<bool> isAvailable() => Future<bool>.value(true);
@@ -52,6 +59,12 @@ class MockFlutterBluetoothSerialPlatform
 
   @override
   Future<bool> isDiscovering() => Future<bool>.value(false);
+
+  @override
+  Future<bool> startDiscovery() => Future<bool>.value(true);
+
+  @override
+  Future<bool> stopDiscovery() => Future<bool>.value(true);
 }
 
 void main() {
@@ -102,4 +115,8 @@ void main() {
   // TODO(anyone): requestDiscoverable
 
   // TODO(anyone): isDiscovering
+
+  // TODO(anyone): startDiscovery
+
+  // TODO(anyone): stopDiscovery
 }

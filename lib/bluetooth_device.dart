@@ -34,7 +34,7 @@ class BluetoothDevice {
   /// Creates `BluetoothDevice` from map.
   ///
   /// Internally used to receive the object from platform code.
-  BluetoothDevice.fromMap(final Map<String, dynamic> map)
+  BluetoothDevice.fromMap(final Map<dynamic, dynamic> map)
       : name = map['name']?.toString(),
         address = map['address']!.toString(),
         type = BluetoothDeviceType.parse(map['type']),

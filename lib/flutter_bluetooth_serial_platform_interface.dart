@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -19,6 +20,10 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
 
   Stream<BluetoothState> onStateChanged() {
     throw UnimplementedError('onStateChanged() has not been implemented.');
+  }
+
+  Stream<BluetoothDiscoveryResult> onDiscovery() {
+    throw UnimplementedError('onDiscovery() has not been implemented.');
   }
 
   Future<bool> isAvailable() {
@@ -71,5 +76,13 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
 
   Future<bool> isDiscovering() {
     throw UnimplementedError('isDiscovering() has not been implemented.');
+  }
+
+  Future<bool> startDiscovery() {
+    throw UnimplementedError('startDiscovery() has not been implemented.');
+  }
+
+  Future<bool> stopDiscovery() {
+    throw UnimplementedError('stopDiscovery() has not been implemented.');
   }
 }
