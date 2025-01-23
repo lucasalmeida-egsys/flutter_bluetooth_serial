@@ -2,6 +2,7 @@ enum BluetoothDeviceType {
   classic(1),
   le(2),
   dual(3),
+  error(-1),
   unknown(-2);
 
   final int value;

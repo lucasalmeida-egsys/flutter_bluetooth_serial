@@ -2,6 +2,7 @@ enum BluetoothBondState {
   none(10),
   bonding(11),
   bonded(12),
+  error(-1),
   unknown(-2);
 
   final int value;

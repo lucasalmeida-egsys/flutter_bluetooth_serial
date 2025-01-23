@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
@@ -54,4 +55,7 @@ class FlutterBluetoothSerial {
 
   Future<bool> stopDiscovery() =>
       FlutterBluetoothSerialPlatform.instance.stopDiscovery();
+
+  Future<BluetoothBondState> getDeviceBondState(final String address) =>
+      FlutterBluetoothSerialPlatform.instance.getDeviceBondState(address);
 }

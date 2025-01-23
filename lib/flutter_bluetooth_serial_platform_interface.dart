@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
@@ -84,5 +85,9 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
 
   Future<bool> stopDiscovery() {
     throw UnimplementedError('stopDiscovery() has not been implemented.');
+  }
+
+  Future<BluetoothBondState> getDeviceBondState(final String address) {
+    throw UnimplementedError('getDeviceBondState() has not been implemented.');
   }
 }

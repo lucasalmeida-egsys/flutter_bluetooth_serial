@@ -95,11 +95,9 @@ class BluetoothDiscoveryWrapper(
                     mapOf(
                         "address" to device?.address,
                         "name" to device?.name,
-                        "type" to device?.type,
-                        // TODO: Update this.
-                        // "isConnected" to checkIsDeviceConnected(device),
-                        "isConnected" to false,
-                        "bondState" to device?.bondState,
+                        "type" to (device?.type ?: -1),
+                        "isConnected" to checkIsDeviceConnected(device),
+                        "bondState" to (device?.bondState ?: -1),
                         "rssi" to deviceRSSI,
                     ),
                 )

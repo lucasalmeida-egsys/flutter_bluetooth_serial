@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 
@@ -108,4 +109,13 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Future<bool> stopDiscovery() async =>
       (await methodChannel.invokeMethod<bool>('stopDiscovery')) ?? false;
+
+  @override
+  Future<BluetoothBondState> getDeviceBondState(final String address) async =>
+      BluetoothBondState.parse(
+        await methodChannel.invokeMethod<bool>(
+          'getDeviceBondState',
+          <String, dynamic>{'address': address},
+        ),
+      );
 }

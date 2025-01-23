@@ -1,3 +1,4 @@
+import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -65,6 +66,10 @@ class MockFlutterBluetoothSerialPlatform
 
   @override
   Future<bool> stopDiscovery() => Future<bool>.value(true);
+
+  @override
+  Future<BluetoothBondState> getDeviceBondState(final String address) =>
+      Future<BluetoothBondState>.value(BluetoothBondState.none);
 }
 
 void main() {
@@ -79,6 +84,8 @@ void main() {
   });
 
   // TODO(anyone): onStateChanged
+
+  // TODO(anyone): onDiscovery
 
   test('isAvailable', () async {
     final FlutterBluetoothSerial flutterBluetoothSerialPlugin =
@@ -119,4 +126,6 @@ void main() {
   // TODO(anyone): startDiscovery
 
   // TODO(anyone): stopDiscovery
+
+  // TODO(anyone): getDeviceBondState
 }

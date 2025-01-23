@@ -1,5 +1,6 @@
 package io.github.edufolly.flutter_bluetooth_serial
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.util.Log
@@ -9,6 +10,17 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 const val TAG = "FlutterBluetoothPlugin"
 const val NAMESPACE = "flutter_bluetooth_serial"
+
+fun checkIsDeviceConnected(device: BluetoothDevice?): Boolean =
+    try {
+        device
+            ?.javaClass
+            ?.getMethod("isConnected")
+            ?.invoke(device)
+            ?.toString() == "true"
+    } catch (t: Throwable) {
+        false
+    }
 
 /**
  * @author Eduardo Folly

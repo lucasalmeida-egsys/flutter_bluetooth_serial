@@ -33,6 +33,8 @@ void main() {
 
   // TODO(anyone): onStateChanged
 
+  // TODO(anyone): onDiscovery
+
   test('isAvailable', () async {
     expect(await platform.isAvailable(), true);
   });
@@ -61,4 +63,9 @@ void main() {
 
   // TODO(anyone): isDiscovering
 
+  // TODO(anyone): startDiscovery
+
+  // TODO(anyone): stopDiscovery
+
+  // TODO(anyone): getDeviceBondState
 }

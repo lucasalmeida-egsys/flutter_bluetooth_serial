@@ -502,7 +502,34 @@ class BluetoothMethodsWrapper(
                 })
             }
 
-            // TODO: getDeviceBondState
+            "getDeviceBondState" -> {
+                if (!call.hasArgument("address")) {
+                    result.error(
+                        "invalid_argument",
+                        "argument 'address' not found",
+                        null,
+                    )
+                    return
+                }
+
+                val address = call.argument<String>("address")
+
+                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+                    result.error(
+                        "invalid_argument",
+                        "'address' argument is required to be string " +
+                            "containing remote MAC address",
+                        null,
+                    )
+                    return
+                }
+
+                result.success(
+                    bluetoothAdapter?.getRemoteDevice(address)?.bondState ?: -1,
+                )
+            }
+
+            // TODO: getBondedDevices
 
             // TODO: removeDeviceBond
 
@@ -510,7 +537,7 @@ class BluetoothMethodsWrapper(
 
             // TODO: pairingRequestHandlingEnable
 
-            // TODO: getBondedDevices
+            // TODO: pairingRequestHandlingDisable
 
             // TODO: connect
 
