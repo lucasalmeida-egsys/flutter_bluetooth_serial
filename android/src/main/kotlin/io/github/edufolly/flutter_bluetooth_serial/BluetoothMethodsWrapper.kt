@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -529,9 +530,32 @@ class BluetoothMethodsWrapper(
                 )
             }
 
-            // TODO: getBondedDevices
+            "getBondedDevices" -> {
+                ensurePermissions({ granted ->
+                    if (granted) {
+                        result.success(
+                            bluetoothAdapter?.bondedDevices?.map {
+                                mapOf(
+                                    "address" to it.address,
+                                    "name" to it.name,
+                                    "type" to it.type,
+                                    "isConnected" to checkIsDeviceConnected(it),
+                                    "bondState" to BluetoothDevice.BOND_BONDED,
+                                )
+                            } ?: emptyMap<String, Any?>(),
+                        )
+                    } else {
+                        result.error(
+                            "no_permissions",
+                            "discovering other devices requires location " +
+                                "access permission",
+                            null,
+                        )
+                    }
+                })
+            }
 
-            // TODO: removeDeviceBond
+            // TODO: removeBondedDevice
 
             // TODO: bondDevice
 

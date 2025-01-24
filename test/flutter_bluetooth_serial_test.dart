@@ -1,4 +1,5 @@
 import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -70,6 +71,14 @@ class MockFlutterBluetoothSerialPlatform
   @override
   Future<BluetoothBondState> getDeviceBondState(final String address) =>
       Future<BluetoothBondState>.value(BluetoothBondState.none);
+
+  @override
+  Future<List<BluetoothDevice>> getBondedDevices() =>
+      Future<List<BluetoothDevice>>.value(
+        <BluetoothDevice>[
+          const BluetoothDevice(address: '00:00:00:00:00:00'),
+        ],
+      );
 }
 
 void main() {

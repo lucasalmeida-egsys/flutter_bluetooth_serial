@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:flutter_bluetooth_serial_example/discovery.dart';
+import 'package:flutter_bluetooth_serial_example/bonded_devices.dart';
+import 'package:flutter_bluetooth_serial_example/discovery_devices.dart';
 import 'package:folly_fields/widgets/folly_dialogs.dart';
 
 class Home extends StatefulWidget {
@@ -240,16 +241,28 @@ class _HomeState extends State<Home> {
                 child: const Text('Request Discoverable'),
               ),
 
-              // Discovery
+              // Discovery Devices
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (final _) => const Discovery(),
+                      builder: (final _) => const DiscoveryDevices(),
                     ),
                   );
                 },
-                child: const Text('Discovery'),
+                child: const Text('Discovery Devices'),
+              ),
+
+              // Bonded Devices
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (final _) => const BondedDevices(),
+                    ),
+                  );
+                },
+                child: const Text('Bonded Devices'),
               ),
             ],
           ),

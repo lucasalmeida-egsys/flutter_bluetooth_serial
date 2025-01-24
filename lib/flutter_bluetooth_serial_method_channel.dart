@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 
@@ -118,4 +119,14 @@ class MethodChannelFlutterBluetoothSerial
           <String, dynamic>{'address': address},
         ),
       );
+
+  @override
+  Future<List<BluetoothDevice>> getBondedDevices() async =>
+      (await methodChannel.invokeMethod<List<dynamic>>('getBondedDevices'))
+          ?.map(
+            (final dynamic e) =>
+                BluetoothDevice.fromMap(e as Map<dynamic, dynamic>),
+          )
+          .toList() ??
+      <BluetoothDevice>[];
 }

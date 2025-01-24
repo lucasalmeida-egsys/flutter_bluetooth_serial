@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-class Discovery extends StatefulWidget {
-  const Discovery({super.key});
+class DiscoveryDevices extends StatefulWidget {
+  const DiscoveryDevices({super.key});
 
   @override
-  State<Discovery> createState() => _DiscoveryState();
+  State<DiscoveryDevices> createState() => _DiscoveryDevicesState();
 }
 
-class _DiscoveryState extends State<Discovery> {
+class _DiscoveryDevicesState extends State<DiscoveryDevices> {
   List<BluetoothDiscoveryResult> results = <BluetoothDiscoveryResult>[];
 
   bool _isDiscovering = false;
@@ -64,8 +64,6 @@ class _DiscoveryState extends State<Discovery> {
                     : () async {
                         await _flutterBluetoothSerialPlugin.startDiscovery();
 
-                        await initPlatformState();
-
                         _flutterBluetoothSerialPlugin.onDiscovery().listen(
                               (final BluetoothDiscoveryResult event) {
                                 if (results.contains(event)) {
@@ -86,6 +84,8 @@ class _DiscoveryState extends State<Discovery> {
                               },
                               onDone: initPlatformState,
                             );
+
+                        await initPlatformState();
                       },
                 child: const Text('Start Discovery'),
               ),
@@ -116,9 +116,7 @@ class _DiscoveryState extends State<Discovery> {
                   return ListTile(
                     title: Text(device.name ?? device.address),
                     subtitle: device.name == null ? null : Text(device.address),
-                    leading: CircleAvatar(
-                      child: Text('${device.rssi}'),
-                    ),
+                    leading: CircleAvatar(child: Text('${device.rssi}')),
                   );
                 },
               ),
