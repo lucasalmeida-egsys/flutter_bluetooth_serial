@@ -555,7 +555,76 @@ class BluetoothMethodsWrapper(
                 })
             }
 
-            // TODO: removeBondedDevice
+            "removeBondedDevice" -> {
+                if (!call.hasArgument("address")) {
+                    result.error(
+                        "invalid_argument",
+                        "argument 'address' not found",
+                        null,
+                    )
+                    return
+                }
+
+                val address = call.argument<String>("address")
+
+                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+                    result.error(
+                        "invalid_argument",
+                        "'address' argument is required to be string " +
+                            "containing remote MAC address",
+                        null,
+                    )
+                    return
+                }
+
+                val device = bluetoothAdapter?.getRemoteDevice(address)
+
+                when (device?.bondState) {
+                    BluetoothDevice.BOND_BONDING -> {
+                        result.error(
+                            "bond_error",
+                            "device already bonding",
+                            null,
+                        )
+                    }
+
+                    BluetoothDevice.BOND_NONE -> {
+                        result.error(
+                            "bond_error",
+                            "device already unbonded",
+                            null,
+                        )
+                    }
+
+                    BluetoothDevice.BOND_BONDED -> {
+                        try {
+                            val method =
+                                device.javaClass.getMethod("removeBond")
+
+                            result.success(
+                                method
+                                    .invoke(device)
+                                    ?.toString()
+                                    ?.lowercase() == "true",
+                            )
+                        } catch (t: Throwable) {
+                            result.error(
+                                "bond_error",
+                                "error while unbonding",
+                                t,
+                            )
+                        }
+                    }
+
+                    else -> {
+                        result.error(
+                            "bond_error",
+                            "unknown status: ${device?.bondState}",
+                            null,
+                        )
+                    }
+                }
+            }
 
             // TODO: bondDevice
 

@@ -79,6 +79,10 @@ class MockFlutterBluetoothSerialPlatform
           const BluetoothDevice(address: '00:00:00:00:00:00'),
         ],
       );
+
+  @override
+  Future<bool> removeBondedDevice(final String address) =>
+      Future<bool>.value(true);
 }
 
 void main() {
@@ -137,4 +141,6 @@ void main() {
   // TODO(anyone): stopDiscovery
 
   // TODO(anyone): getDeviceBondState
+
+  // TODO(anyone): removeBondedDevice
 }

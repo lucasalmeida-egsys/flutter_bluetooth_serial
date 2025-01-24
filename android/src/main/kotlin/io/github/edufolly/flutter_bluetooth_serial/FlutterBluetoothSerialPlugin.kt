@@ -17,7 +17,8 @@ fun checkIsDeviceConnected(device: BluetoothDevice?): Boolean =
             ?.javaClass
             ?.getMethod("isConnected")
             ?.invoke(device)
-            ?.toString() == "true"
+            ?.toString()
+            ?.lowercase() == "true"
     } catch (t: Throwable) {
         false
     }

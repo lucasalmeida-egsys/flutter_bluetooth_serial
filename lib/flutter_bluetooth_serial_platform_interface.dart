@@ -93,6 +93,10 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
   }
 
   Future<List<BluetoothDevice>> getBondedDevices() {
-    throw UnimplementedError('getDeviceBondState() has not been implemented.');
+    throw UnimplementedError('getBondedDevices() has not been implemented.');
+  }
+
+  Future<bool> removeBondedDevice(final String address) {
+    throw UnimplementedError('removeBondedDevice() has not been implemented.');
   }
 }

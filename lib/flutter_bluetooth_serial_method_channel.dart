@@ -114,7 +114,7 @@ class MethodChannelFlutterBluetoothSerial
   @override
   Future<BluetoothBondState> getDeviceBondState(final String address) async =>
       BluetoothBondState.parse(
-        await methodChannel.invokeMethod<bool>(
+        await methodChannel.invokeMethod<int>(
           'getDeviceBondState',
           <String, dynamic>{'address': address},
         ),
@@ -129,4 +129,13 @@ class MethodChannelFlutterBluetoothSerial
           )
           .toList() ??
       <BluetoothDevice>[];
+
+  @override
+  Future<bool> removeBondedDevice(final String address) async {
+    return (await methodChannel.invokeMethod<bool>(
+          'removeBondedDevice',
+          <String, dynamic>{'address': address},
+        )) ??
+        false;
+  }
 }

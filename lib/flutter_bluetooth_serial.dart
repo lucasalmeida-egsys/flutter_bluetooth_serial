@@ -62,4 +62,7 @@ class FlutterBluetoothSerial {
 
   Future<List<BluetoothDevice>> getBondedDevices() =>
       FlutterBluetoothSerialPlatform.instance.getBondedDevices();
+
+  Future<bool> removeBondedDevice(final String address) =>
+      FlutterBluetoothSerialPlatform.instance.removeBondedDevice(address);
 }

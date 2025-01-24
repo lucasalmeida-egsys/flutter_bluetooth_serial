@@ -68,4 +68,6 @@ void main() {
   // TODO(anyone): stopDiscovery
 
   // TODO(anyone): getDeviceBondState
+
+  // TODO(anyone): removeBondedDevice
 }
