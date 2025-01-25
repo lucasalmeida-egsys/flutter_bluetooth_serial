@@ -74,4 +74,10 @@ void main() {
   // TODO(anyone): setPairingRequestHandler
 
   // TODO(anyone): bondDevice
+
+  // TODO(anyone): connect
+
+  // TODO(anyone): write
+
+  // TODO(anyone): disconnect
 }

@@ -29,10 +29,7 @@ fun checkIsDeviceConnected(device: BluetoothDevice?): Boolean =
 class FlutterBluetoothSerialPlugin :
     FlutterPlugin,
     ActivityAware {
-    // Connections
-    // Contains all active connections.
-    // Maps ID of the connection with plugin data channels.
-    private val connections = mutableSetOf<BluetoothConnection>()
+    private val connections = mutableMapOf<String, BluetoothConnectionWrapper>()
 
     private lateinit var discoveryWrapper: BluetoothDiscoveryWrapper
     private lateinit var stateWrapper: BluetoothStateWrapper
@@ -47,17 +44,9 @@ class FlutterBluetoothSerialPlugin :
 
         discoveryWrapper = BluetoothDiscoveryWrapper(messenger)
 
-        stateWrapper =
-            BluetoothStateWrapper(
-                messenger,
-                clearAllConnections = {
-                    Log.w(TAG, "Clear All Connections!!")
-                    connections.forEach { it.disconnect() }
-                    connections.clear()
-                },
-            )
+        stateWrapper = BluetoothStateWrapper(messenger, connections)
 
-        methodsWrapper = BluetoothMethodsWrapper(messenger)
+        methodsWrapper = BluetoothMethodsWrapper(messenger, connections)
     }
 
     override fun onDetachedFromEngine(

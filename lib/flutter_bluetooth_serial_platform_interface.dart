@@ -116,4 +116,14 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('bondDevice() has not been implemented.');
   }
+
+  Future<String> connect(final String address) {
+    throw UnimplementedError('connect() has not been implemented.');
+  }
+
+  // TODO(edufolly): Write
+
+  Future<void> disconnect(final String id) {
+    throw UnimplementedError('disconnect() has not been implemented.');
+  }
 }

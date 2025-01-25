@@ -16,8 +16,8 @@ class BluetoothConnectionWrapper(
     adapter: BluetoothAdapter,
     messenger: BinaryMessenger,
     private val activity: Activity,
-    private val id: Int,
-    private val onClosed: (id: Int) -> Unit,
+    val id: String,
+    private val connections: MutableMap<String, BluetoothConnectionWrapper>,
 ) : BluetoothConnection(adapter),
     StreamHandler {
     private var readSink: EventSink? = null
@@ -44,7 +44,7 @@ class BluetoothConnectionWrapper(
         // TODO: Use coroutines!
         AsyncTask.execute {
             readChannel.setStreamHandler(null)
-            onClosed(id)
+            connections.remove(id)
 
             Log.d(TAG, "Disconnected (id: $id)")
         }

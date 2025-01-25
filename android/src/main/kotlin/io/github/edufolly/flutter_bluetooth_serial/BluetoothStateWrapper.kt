@@ -18,7 +18,7 @@ import io.flutter.plugin.common.EventChannel.StreamHandler
  */
 class BluetoothStateWrapper(
     messenger: BinaryMessenger,
-    private val clearAllConnections: () -> Unit,
+    private val connections: MutableMap<String, BluetoothConnectionWrapper>,
 ) : BroadcastReceiver(),
     StreamHandler {
     private val stateChannel: EventChannel =
@@ -74,8 +74,9 @@ class BluetoothStateWrapper(
 
         when (intent.action) {
             BluetoothAdapter.ACTION_STATE_CHANGED -> {
-                // Disconnect all connections
-                clearAllConnections()
+                Log.w(TAG, "Clear All Connections!!")
+                connections.values.forEach { it.disconnect() }
+                connections.clear()
 
                 stateSink?.success(
                     intent.getIntExtra(

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.edufolly.flutter_bluetooth_serial
 
 import android.Manifest
@@ -10,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.AsyncTask
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -32,7 +35,8 @@ const val BLUETOOTH_REQUEST_DISABLE: String =
  * @author Eduardo Folly
  */
 class BluetoothMethodsWrapper(
-    messenger: BinaryMessenger,
+    private val messenger: BinaryMessenger,
+    private val connections: MutableMap<String, BluetoothConnectionWrapper>,
 ) : MethodCallHandler,
     ActivityResultListener,
     RequestPermissionsResultListener {
@@ -743,9 +747,81 @@ class BluetoothMethodsWrapper(
                 }
             }
 
-            // TODO: connect
+            "connect" -> {
+                val device = getDevice(call, result) ?: return
 
-            // TODO: write
+                val id = device.address
+
+                // TODO: Check if already connected
+
+                val connection =
+                    BluetoothConnectionWrapper(
+                        bluetoothAdapter!!,
+                        messenger,
+                        activity,
+                        id,
+                        connections,
+                    )
+
+                connections[id] = connection
+
+                Log.d(TAG, "Connecting to $id")
+
+                AsyncTask.execute {
+                    try {
+                        connection.connect(id)
+                        activity.runOnUiThread { result.success(id) }
+                    } catch (t: Throwable) {
+                        activity.runOnUiThread {
+                            result.error("connect_error", t.message, t)
+                            connections.remove(id)
+                        }
+                    }
+                }
+            }
+
+            "write" -> {
+                val connection = getConnectionById(call, result) ?: return
+
+                val bytes: ByteArray =
+                    if (call.hasArgument("string")) {
+                        call.argument<String>("string")!!.toByteArray()
+                    } else if (call.hasArgument("bytes")) {
+                        call.argument<ByteArray>("bytes")!!
+                    } else {
+                        result.error(
+                            "invalid_argument",
+                            "there must be 'string' or 'bytes' argument",
+                            null,
+                        )
+                        return
+                    }
+
+                AsyncTask.execute {
+                    try {
+                        connection.write(bytes)
+                        activity.runOnUiThread { result.success(null) }
+                    } catch (t: Throwable) {
+                        activity.runOnUiThread {
+                            result.error(
+                                "write_error",
+                                t.message,
+                                t,
+                            )
+                        }
+                    }
+                }
+            }
+
+            "disconnect" -> {
+                val connection = getConnectionById(call, result) ?: return
+
+                Log.d(TAG, "Disconnecting: ${connection.id}")
+
+                connection.disconnect()
+
+                result.success(null)
+            }
 
             else -> {
                 Log.w(TAG, "Unknown method ${call.method}")
@@ -780,5 +856,34 @@ class BluetoothMethodsWrapper(
         }
 
         return bluetoothAdapter?.getRemoteDevice(address)
+    }
+
+    private fun getConnectionById(
+        call: MethodCall,
+        result: Result,
+    ): BluetoothConnectionWrapper? {
+        if (!call.hasArgument("id")) {
+            result.error(
+                "invalid_argument",
+                "argument 'id' not found",
+                null,
+            )
+            return null
+        }
+
+        val id = call.argument<String>("id").toString()
+
+        val connection = connections[id]
+
+        if (connection == null) {
+            result.error(
+                "invalid_argument",
+                "there is no connection with provided id",
+                null,
+            )
+            return null
+        }
+
+        return connection
     }
 }

@@ -7,13 +7,14 @@ import 'package:folly_fields/widgets/folly_dialogs.dart';
 
 class BluetoothDeviceTile extends StatelessWidget {
   final BluetoothDevice device;
-
-  final Future<bool> Function(BluetoothDevice device)? bondDevice;
   final Future<bool> Function(BluetoothDevice device) removeBondedDevice;
+  final void Function(BluetoothDevice device)? onTap;
+  final Future<bool> Function(BluetoothDevice device)? bondDevice;
 
   const BluetoothDeviceTile(
     this.device, {
     required this.removeBondedDevice,
+    this.onTap,
     this.bondDevice,
     super.key,
   });
@@ -40,6 +41,7 @@ class BluetoothDeviceTile extends StatelessWidget {
       ),
       title: Text(device.name ?? device.address),
       subtitle: device.name == null ? null : Text(device.address),
+      onTap: onTap == null ? null : () => onTap!(device),
       trailing: !device.isBonded && bondDevice == null
           ? null
           : IconButton(

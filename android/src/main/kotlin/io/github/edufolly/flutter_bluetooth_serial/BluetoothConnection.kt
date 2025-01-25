@@ -24,7 +24,8 @@ abstract class BluetoothConnection(
 
     private var connectionThread: BluetoothConnectionThread? = null
 
-    fun isConnected(): Boolean = connectionThread?.isRequestedClosing() ?: false
+    private fun isConnected(): Boolean =
+        connectionThread?.isRequestedClosing() ?: false
 
     // TODO: `connect` could be done performed on the other thread
     // TODO: `connect` parameter: timeout
@@ -65,10 +66,10 @@ abstract class BluetoothConnection(
     }
 
     fun disconnect() {
-        if (isConnected()) {
-            connectionThread?.cancel()
-            connectionThread = null
-        }
+//        if (isConnected()) {
+        connectionThread?.cancel()
+        connectionThread = null
+//        }
     }
 
     fun write(bytes: ByteArray) {

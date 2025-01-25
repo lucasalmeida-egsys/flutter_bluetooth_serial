@@ -81,4 +81,12 @@ class FlutterBluetoothSerial {
         pin: pin,
         passkeyConfirm: passkeyConfirm,
       );
+
+  Future<String> connect(final String address) async =>
+      FlutterBluetoothSerialPlatform.instance.connect(address);
+
+  // TODO(edufolly): Write
+
+  Future<void> disconnect(final String id) =>
+      FlutterBluetoothSerialPlatform.instance.disconnect(id);
 }

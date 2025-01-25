@@ -97,6 +97,15 @@ class MockFlutterBluetoothSerialPlatform
     final bool? passkeyConfirm,
   }) =>
       Future<bool>.value(true);
+
+  @override
+  Future<String> connect(final String address) =>
+      Future<String>.value('00:00:00:00:00:00');
+
+  // TODO(edufolly): Write
+
+  @override
+  Future<void> disconnect(final String id) => Future<void>.value();
 }
 
 void main() {
@@ -161,4 +170,10 @@ void main() {
   // TODO(anyone): setPairingRequestHandler
 
   // TODO(anyone): bondDevice
+
+  // TODO(anyone): connect
+
+  // TODO(anyone): write
+
+  // TODO(anyone): disconnect
 }

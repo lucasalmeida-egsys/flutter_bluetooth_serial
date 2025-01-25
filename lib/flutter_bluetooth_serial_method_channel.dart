@@ -287,4 +287,23 @@ class MethodChannelFlutterBluetoothSerial
         ) ??
         false;
   }
+
+  @override
+  Future<String> connect(final String address) async {
+    return await methodChannel.invokeMethod(
+          'connect',
+          <String, dynamic>{'address': address},
+        ) ??
+        -1;
+  }
+
+  // TODO(edufolly): Write
+
+  @override
+  Future<void> disconnect(final String id) {
+    return methodChannel.invokeMethod(
+      'disconnect',
+      <String, dynamic>{'id': id},
+    );
+  }
 }

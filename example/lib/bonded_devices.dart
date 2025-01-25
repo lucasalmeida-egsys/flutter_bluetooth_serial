@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_bluetooth_serial_example/bluetooth_device_tile.dart';
+import 'package:flutter_bluetooth_serial_example/connect_device.dart';
 
 import 'package:folly_fields/util/safe_builder.dart';
 
@@ -22,6 +23,12 @@ class _BondedDevicesState extends State<BondedDevices> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Bonded Devices'),
+          actions: <Widget>[
+            IconButton(
+              onPressed: () => setState(() {}),
+              icon: const Icon(Icons.refresh),
+            ),
+          ],
         ),
         body: Expanded(
           child: SafeFutureBuilder<List<BluetoothDevice>>(
@@ -36,6 +43,13 @@ class _BondedDevicesState extends State<BondedDevices> {
                 itemBuilder: (final BuildContext context, final int index) {
                   return BluetoothDeviceTile(
                     data[index],
+                    onTap: (final BluetoothDevice device) =>
+                        Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (final BuildContext context) =>
+                            ConnectDevice(device),
+                      ),
+                    ),
                     removeBondedDevice: (final BluetoothDevice device) async {
                       final bool removed = await _flutterBluetoothSerialPlugin
                           .removeBondedDevice(device.address);
