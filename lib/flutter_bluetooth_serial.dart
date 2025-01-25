@@ -1,6 +1,7 @@
 import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_pairing_request.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_platform_interface.dart';
 
@@ -29,14 +30,13 @@ class FlutterBluetoothSerial {
   Future<bool> ensurePermissions() =>
       FlutterBluetoothSerialPlatform.instance.ensurePermissions();
 
-  Future<String?> getAddress() =>
-      FlutterBluetoothSerialPlatform.instance.getAddress();
+  Future<String?> get address =>
+      FlutterBluetoothSerialPlatform.instance.address;
 
-  Future<BluetoothState> getState() =>
-      FlutterBluetoothSerialPlatform.instance.getState();
+  Future<BluetoothState> get state =>
+      FlutterBluetoothSerialPlatform.instance.state;
 
-  Future<String?> getName() =>
-      FlutterBluetoothSerialPlatform.instance.getName();
+  Future<String?> get name => FlutterBluetoothSerialPlatform.instance.name;
 
   Future<bool> setName(final String name) =>
       FlutterBluetoothSerialPlatform.instance.setName(name);
@@ -65,4 +65,20 @@ class FlutterBluetoothSerial {
 
   Future<bool> removeBondedDevice(final String address) =>
       FlutterBluetoothSerialPlatform.instance.removeBondedDevice(address);
+
+  void setPairingRequestHandler(
+    final Future<dynamic> Function(BluetoothPairingRequest request)? handler,
+  ) =>
+      FlutterBluetoothSerialPlatform.instance.setPairingRequestHandler(handler);
+
+  Future<bool> bondDevice(
+    final String address, {
+    final String? pin,
+    final bool? passkeyConfirm,
+  }) =>
+      FlutterBluetoothSerialPlatform.instance.bondDevice(
+        address,
+        pin: pin,
+        passkeyConfirm: passkeyConfirm,
+      );
 }

@@ -70,10 +70,8 @@ class BluetoothDiscoveryWrapper(
         when (intent.action) {
             BluetoothDevice.ACTION_FOUND -> {
                 // TODO: getParcelableExtra is deprecated.
-                val device =
-                    intent.getParcelableExtra<BluetoothDevice>(
-                        BluetoothDevice.EXTRA_DEVICE,
-                    )
+                val device: BluetoothDevice? =
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
 
                 // TODO !BluetoothClass!
                 //  final BluetoothClass deviceClass =

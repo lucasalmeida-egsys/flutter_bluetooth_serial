@@ -70,4 +70,8 @@ void main() {
   // TODO(anyone): getDeviceBondState
 
   // TODO(anyone): removeBondedDevice
+
+  // TODO(anyone): setPairingRequestHandler
+
+  // TODO(anyone): bondDevice
 }

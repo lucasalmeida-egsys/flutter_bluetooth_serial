@@ -1,6 +1,7 @@
 import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_pairing_request.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
@@ -40,14 +41,14 @@ class MockFlutterBluetoothSerialPlatform
   Future<bool> ensurePermissions() => Future<bool>.value(true);
 
   @override
-  Future<String> getAddress() => Future<String>.value('00:00:00:00:00:00');
+  Future<String> get address => Future<String>.value('00:00:00:00:00:00');
 
   @override
-  Future<BluetoothState> getState() =>
+  Future<BluetoothState> get state =>
       Future<BluetoothState>.value(BluetoothState.on);
 
   @override
-  Future<String> getName() => Future<String>.value('mock');
+  Future<String> get name => Future<String>.value('mock');
 
   @override
   Future<bool> setName(final String name) => Future<bool>.value(true);
@@ -82,6 +83,19 @@ class MockFlutterBluetoothSerialPlatform
 
   @override
   Future<bool> removeBondedDevice(final String address) =>
+      Future<bool>.value(true);
+
+  @override
+  void setPairingRequestHandler(
+    final Future<dynamic> Function(BluetoothPairingRequest request)? handler,
+  ) {}
+
+  @override
+  Future<bool> bondDevice(
+    final String address, {
+    final String? pin,
+    final bool? passkeyConfirm,
+  }) =>
       Future<bool>.value(true);
 }
 
@@ -143,4 +157,8 @@ void main() {
   // TODO(anyone): getDeviceBondState
 
   // TODO(anyone): removeBondedDevice
+
+  // TODO(anyone): setPairingRequestHandler
+
+  // TODO(anyone): bondDevice
 }

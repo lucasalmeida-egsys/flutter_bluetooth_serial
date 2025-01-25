@@ -1,6 +1,7 @@
 import 'package:flutter_bluetooth_serial/bluetooth_bond_state.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_pairing_request.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -52,16 +53,16 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
     throw UnimplementedError('ensurePermissions() has not been implemented.');
   }
 
-  Future<String?> getAddress() {
-    throw UnimplementedError('getAddress() has not been implemented.');
+  Future<String?> get address {
+    throw UnimplementedError('get address has not been implemented.');
   }
 
-  Future<BluetoothState> getState() {
-    throw UnimplementedError('getState() has not been implemented.');
+  Future<BluetoothState> get state {
+    throw UnimplementedError('get state has not been implemented.');
   }
 
-  Future<String?> getName() {
-    throw UnimplementedError('getName() has not been implemented.');
+  Future<String?> get name {
+    throw UnimplementedError('get name has not been implemented.');
   }
 
   Future<bool> setName(final String name) {
@@ -98,5 +99,21 @@ abstract class FlutterBluetoothSerialPlatform extends PlatformInterface {
 
   Future<bool> removeBondedDevice(final String address) {
     throw UnimplementedError('removeBondedDevice() has not been implemented.');
+  }
+
+  void setPairingRequestHandler(
+    final Future<dynamic> Function(BluetoothPairingRequest request)? handler,
+  ) {
+    throw UnimplementedError(
+      'setPairingRequestHandler() has not been implemented.',
+    );
+  }
+
+  Future<bool> bondDevice(
+    final String address, {
+    final String? pin,
+    final bool? passkeyConfirm,
+  }) {
+    throw UnimplementedError('bondDevice() has not been implemented.');
   }
 }

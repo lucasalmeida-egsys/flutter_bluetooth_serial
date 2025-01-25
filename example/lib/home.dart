@@ -1,5 +1,3 @@
-// ignore_for_file: document_ignores, use_build_context_synchronously
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_state.dart';
@@ -37,16 +35,16 @@ class _HomeState extends State<Home> {
 
     final bool isEnabled = await _flutterBluetoothSerialPlugin.isEnabled();
 
-    final BluetoothState state = await _flutterBluetoothSerialPlugin.getState();
+    final BluetoothState state = await _flutterBluetoothSerialPlugin.state;
 
-    final String? name = await _flutterBluetoothSerialPlugin.getName();
+    final String? name = await _flutterBluetoothSerialPlugin.name;
 
     String? address;
 
     if (force) {
       // Doesn't work on my phone.
       try {
-        address = await _flutterBluetoothSerialPlugin.getAddress();
+        address = await _flutterBluetoothSerialPlugin.address;
       } on Exception {
         // Nothing to do.
       }

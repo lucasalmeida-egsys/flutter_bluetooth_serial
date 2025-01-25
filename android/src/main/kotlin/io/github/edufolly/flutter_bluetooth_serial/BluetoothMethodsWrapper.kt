@@ -5,7 +5,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
@@ -46,7 +49,12 @@ class BluetoothMethodsWrapper(
 
     private lateinit var discoveryWrapper: BluetoothDiscoveryWrapper
 
+    private val pairingWrapper = BluetoothPairingWrapper()
+
     private var bluetoothAdapter: BluetoothAdapter? = null
+
+    private var bondStateBroadcastReceiver: BroadcastReceiver? = null
+    private var isPairingRequestHandlerSet = false
 
     fun config(
         activity: Activity,
@@ -56,9 +64,12 @@ class BluetoothMethodsWrapper(
         this.activity = activity
         this.discoveryWrapper = discoveryWrapper
         this.bluetoothAdapter = bluetoothAdapter
+
+        pairingWrapper.config(activity, methodChannel)
     }
 
     fun close() {
+        pairingWrapper.close()
         methodChannel.setMethodCallHandler(null)
     }
 
@@ -156,6 +167,7 @@ class BluetoothMethodsWrapper(
     }
 
     @SuppressLint("MissingPermission", "HardwareIds", "PrivateApi")
+    @Suppress("DEPRECATION")
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
@@ -394,33 +406,37 @@ class BluetoothMethodsWrapper(
             }
 
             "setName" -> {
-                if (checkPermissions(Manifest.permission.BLUETOOTH_CONNECT)) {
-                    if (call.hasArgument("name")) {
-                        try {
-                            result.success(
-                                bluetoothAdapter?.setName(
-                                    call.argument("name"),
-                                ) ?: false,
-                            )
-                        } catch (e: Exception) {
-                            result.error(
-                                "invalid_argument",
-                                "'name' argument is required to be string",
-                                e,
-                            )
-                        }
-                    } else {
-                        result.error(
-                            "invalid_argument",
-                            "argument 'name' not found",
-                            null,
-                        )
-                    }
-                } else {
+                if (!checkPermissions(Manifest.permission.BLUETOOTH_CONNECT)) {
                     result.error(
                         "invalid_permissions",
                         "BLUETOOTH_CONNECT permission is required",
                         null,
+                    )
+
+                    return
+                }
+
+                if (!call.hasArgument("name")) {
+                    result.error(
+                        "invalid_argument",
+                        "argument 'name' not found",
+                        null,
+                    )
+
+                    return
+                }
+
+                try {
+                    result.success(
+                        bluetoothAdapter?.setName(
+                            call.argument("name"),
+                        ) ?: false,
+                    )
+                } catch (e: Exception) {
+                    result.error(
+                        "invalid_argument",
+                        "'name' argument is required to be string",
+                        e,
                     )
                 }
             }
@@ -504,29 +520,8 @@ class BluetoothMethodsWrapper(
             }
 
             "getDeviceBondState" -> {
-                if (!call.hasArgument("address")) {
-                    result.error(
-                        "invalid_argument",
-                        "argument 'address' not found",
-                        null,
-                    )
-                    return
-                }
-
-                val address = call.argument<String>("address")
-
-                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-                    result.error(
-                        "invalid_argument",
-                        "'address' argument is required to be string " +
-                            "containing remote MAC address",
-                        null,
-                    )
-                    return
-                }
-
                 result.success(
-                    bluetoothAdapter?.getRemoteDevice(address)?.bondState ?: -1,
+                    getDevice(call, result)?.bondState ?: -1,
                 )
             }
 
@@ -556,28 +551,7 @@ class BluetoothMethodsWrapper(
             }
 
             "removeBondedDevice" -> {
-                if (!call.hasArgument("address")) {
-                    result.error(
-                        "invalid_argument",
-                        "argument 'address' not found",
-                        null,
-                    )
-                    return
-                }
-
-                val address = call.argument<String>("address")
-
-                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-                    result.error(
-                        "invalid_argument",
-                        "'address' argument is required to be string " +
-                            "containing remote MAC address",
-                        null,
-                    )
-                    return
-                }
-
-                val device = bluetoothAdapter?.getRemoteDevice(address)
+                val device = getDevice(call, result)
 
                 when (device?.bondState) {
                     BluetoothDevice.BOND_BONDING -> {
@@ -626,11 +600,148 @@ class BluetoothMethodsWrapper(
                 }
             }
 
-            // TODO: bondDevice
+            "bondDevice" -> {
+                if (bondStateBroadcastReceiver != null) {
+                    result.error(
+                        "bond_error",
+                        "another bonding process is ongoing from local device",
+                        null,
+                    )
+                    return
+                }
 
-            // TODO: pairingRequestHandlingEnable
+                val device = getDevice(call, result) ?: return
 
-            // TODO: pairingRequestHandlingDisable
+                when (device.bondState) {
+                    BluetoothDevice.BOND_BONDING -> {
+                        result.error(
+                            "bond_error",
+                            "device already bonding",
+                            null,
+                        )
+                        return
+                    }
+
+                    BluetoothDevice.BOND_BONDED -> {
+                        result.error(
+                            "bond_error",
+                            "device already bonded",
+                            null,
+                        )
+                        return
+                    }
+                }
+
+                bondStateBroadcastReceiver =
+                    object : BroadcastReceiver() {
+                        override fun onReceive(
+                            context: Context,
+                            intent: Intent,
+                        ) {
+                            when (intent.action) {
+                                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                                    // TODO: getParcelableExtra is deprecated.
+                                    val someDevice: BluetoothDevice? =
+                                        intent
+                                            .getParcelableExtra(
+                                                BluetoothDevice.EXTRA_DEVICE,
+                                            )
+
+                                    if (someDevice != device) {
+                                        return
+                                    }
+
+                                    val newBondState =
+                                        intent.getIntExtra(
+                                            BluetoothDevice.EXTRA_BOND_STATE,
+                                            BluetoothDevice.ERROR,
+                                        )
+
+                                    when (newBondState) {
+                                        BluetoothDevice.BOND_BONDING -> {
+                                            // Wait for true bond result
+                                            return
+                                        }
+
+                                        BluetoothDevice.BOND_BONDED -> {
+                                            result.success(true)
+                                        }
+
+                                        BluetoothDevice.BOND_NONE -> {
+                                            result.success(false)
+                                        }
+
+                                        else -> {
+                                            result.error(
+                                                "bond_error",
+                                                "invalid bond state while bonding",
+                                                null,
+                                            )
+                                        }
+                                    }
+
+                                    activity.unregisterReceiver(this)
+                                    bondStateBroadcastReceiver = null
+                                }
+
+                                // TODO: BluetoothDevice.ACTION_PAIRING_CANCEL
+                                else -> {
+                                    Log.w(
+                                        TAG,
+                                        "Unknown bond state action: ${intent.action}",
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                activity.registerReceiver(
+                    bondStateBroadcastReceiver,
+                    IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED),
+                )
+
+                if (!device.createBond()) {
+                    result.error(
+                        "bond_error",
+                        "error starting bonding process",
+                        null,
+                    )
+                    // activity.unregisterReceiver(bondStateBroadcastReceiver)
+                    // bondStateBroadcastReceiver = null
+                }
+            }
+
+            "pairingRequestHandlingEnable" -> {
+                if (isPairingRequestHandlerSet) {
+                    result.error(
+                        "logic_error",
+                        "pairing request handling is already enabled",
+                        null,
+                    )
+                    return
+                }
+
+                Log.d(TAG, "Starting listening for pairing requests to handle")
+                isPairingRequestHandlerSet = true
+
+                activity.registerReceiver(
+                    pairingWrapper,
+                    IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST),
+                )
+            }
+
+            "pairingRequestHandlingDisable" -> {
+                isPairingRequestHandlerSet = false
+                try {
+                    activity.unregisterReceiver(pairingWrapper)
+                    Log.d(
+                        TAG,
+                        "Stopped listening for pairing requests to handle",
+                    )
+                } catch (t: Throwable) {
+                    // Ignore `Receiver not registered` exception
+                }
+            }
 
             // TODO: connect
 
@@ -641,5 +752,33 @@ class BluetoothMethodsWrapper(
                 result.notImplemented()
             }
         }
+    }
+
+    private fun getDevice(
+        call: MethodCall,
+        result: Result,
+    ): BluetoothDevice? {
+        if (!call.hasArgument("address")) {
+            result.error(
+                "invalid_argument",
+                "argument 'address' not found",
+                null,
+            )
+            return null
+        }
+
+        val address = call.argument<String>("address")
+
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            result.error(
+                "invalid_argument",
+                "'address' argument is required to be string " +
+                    "containing remote MAC address",
+                null,
+            )
+            return null
+        }
+
+        return bluetoothAdapter?.getRemoteDevice(address)
     }
 }

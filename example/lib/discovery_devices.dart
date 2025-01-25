@@ -1,11 +1,11 @@
-// ignore_for_file: document_ignores, use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_discovery_result.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_bluetooth_serial_example/bluetooth_device_tile.dart';
 
 class DiscoveryDevices extends StatefulWidget {
   const DiscoveryDevices({super.key});
@@ -111,12 +111,29 @@ class _DiscoveryDevicesState extends State<DiscoveryDevices> {
               child: ListView.builder(
                 itemCount: results.length,
                 itemBuilder: (final BuildContext context, final int index) {
-                  final BluetoothDiscoveryResult device = results[index];
+                  return BluetoothDeviceTile(
+                    results[index],
+                    bondDevice: (final BluetoothDevice device) async {
+                      final bool bonded = await _flutterBluetoothSerialPlugin
+                          .bondDevice(device.address);
 
-                  return ListTile(
-                    title: Text(device.name ?? device.address),
-                    subtitle: device.name == null ? null : Text(device.address),
-                    leading: CircleAvatar(child: Text('${device.rssi}')),
+                      // if (bonded) {
+                      //   await initPlatformState();
+                      // }
+
+                      return bonded;
+                    },
+                    removeBondedDevice: (final BluetoothDevice device) async {
+                      final bool removed = await _flutterBluetoothSerialPlugin
+                          .removeBondedDevice(device.address);
+
+                      if (removed) {
+                        results.remove(device);
+                        await initPlatformState();
+                      }
+
+                      return removed;
+                    },
                   );
                 },
               ),

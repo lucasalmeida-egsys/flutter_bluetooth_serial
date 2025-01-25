@@ -1,12 +1,9 @@
-// ignore_for_file: document_ignores, use_build_context_synchronously
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/bluetooth_device.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_bluetooth_serial_example/bluetooth_device_tile.dart';
 
 import 'package:folly_fields/util/safe_builder.dart';
-import 'package:folly_fields/widgets/folly_dialogs.dart';
 
 class BondedDevices extends StatefulWidget {
   const BondedDevices({super.key});
@@ -36,49 +33,19 @@ class _BondedDevicesState extends State<BondedDevices> {
             ) {
               return ListView.builder(
                 itemCount: data.length,
-                itemBuilder: (
-                  final BuildContext context,
-                  final int index,
-                ) {
-                  final BluetoothDevice device = data[index];
-                  return ListTile(
-                    leading: Icon(
-                      Icons.circle,
-                      color: device.isConnected ? Colors.green : Colors.red,
-                    ),
-                    title: Text(device.name ?? device.address),
-                    subtitle: device.name == null ? null : Text(device.address),
-                    trailing: IconButton(
-                      onPressed: () async {
-                        try {
-                          final bool removed =
-                              await _flutterBluetoothSerialPlugin
-                                  .removeBondedDevice(device.address);
+                itemBuilder: (final BuildContext context, final int index) {
+                  return BluetoothDeviceTile(
+                    data[index],
+                    removeBondedDevice: (final BluetoothDevice device) async {
+                      final bool removed = await _flutterBluetoothSerialPlugin
+                          .removeBondedDevice(device.address);
 
-                          await FollyDialogs.dialogMessage(
-                            context: context,
-                            title: 'Remove Bonded Device',
-                            message: '$removed',
-                          );
+                      if (removed) {
+                        setState(() {});
+                      }
 
-                          if (removed) {
-                            setState(() {});
-                          }
-                        } on Exception catch (e, s) {
-                          if (kDebugMode) {
-                            print(e);
-                            print(s);
-                          }
-
-                          await FollyDialogs.dialogMessage(
-                            context: context,
-                            title: 'Error',
-                            message: '$e',
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.delete),
-                    ),
+                      return removed;
+                    },
                   );
                 },
               );
